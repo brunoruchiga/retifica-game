@@ -19,8 +19,12 @@ let messagesContainer;
 let startButton;
 let activeUsernamesListContainer;
 
+let gameRoundContainer;
 let randomLetterSlot;
+let timerSlot;
 let categoriesContainer;
+
+let timer;
 
 function setup() {
   socket = io.connect(HOST);
@@ -28,8 +32,10 @@ function setup() {
   socket.on('userJoinedGame', handleUserJoinedGame);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('gameStarted', handleNewGame);
+  socket.on('serverTimerExpired', handleGameRoundEnded);
   socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
+
 
   noCanvas();
 
@@ -46,8 +52,10 @@ function setup() {
 
   activeUsernamesListContainer = createDiv('').id('usernames-list').class('container').parent(containerBody);
 
-  randomLetterSlot = createP('_').id('random-letter').parent(containerBody);
-  categoriesContainer = createDiv('').id('categories-container').class('container').parent(containerBody);
+  gameRoundContainer = createDiv('').id('game-round-container').class('container').parent(containerBody);
+  randomLetterSlot = createP('_').id('random-letter').parent(gameRoundContainer);
+  timerSlot = createP('_').id('timer').parent(gameRoundContainer);
+  categoriesContainer = createDiv('').id('categories-container').parent(gameRoundContainer);
 
   messagesInstructions = createP('<br><br><br><br><br><br>Chat:').parent(containerBody);
   editableText = createInput('').parent(containerBody);
@@ -77,7 +85,7 @@ function changeVisibility(element, visible) {
   if(visible) {
     element.removeClass('hidden');
   } else {
-    element.class('hidden');
+    element.addClass('hidden');
   }
 }
 
@@ -95,7 +103,7 @@ function requestToJoinGame() {
 }
 
 function handleUserJoinedGame() {
-  changeScreenStateTo('GAME');
+  changeScreenStateTo('LOBBY');
   editableText.elt.focus();
 }
 
@@ -120,7 +128,15 @@ function changeScreenStateTo(newState) {
     changeVisibility(containerLogin, true);
     changeVisibility(containerBody, false);
   }
-  if(newState == 'GAME') {
+  if(newState == 'LOBBY') {
+    changeVisibility(startButton, true);
+    changeVisibility(gameRoundContainer, false);
+    changeVisibility(containerLogin, false);
+    changeVisibility(containerBody, true);
+  }
+  if(newState == 'GAME_PLAYING') {
+    changeVisibility(startButton, false);
+    changeVisibility(gameRoundContainer, true);
     changeVisibility(containerLogin, false);
     changeVisibility(containerBody, true);
   }
@@ -138,9 +154,32 @@ function handleNewGame(data) {
     createP(data.categories[i]).parent(categoriesContainer);
     createInput('').parent(categoriesContainer);
   }
+
+  initializeTimer(data.totalTime);
+
+  changeScreenStateTo('GAME_PLAYING');
+}
+
+function initializeTimer(initialTime) {
+  timer = initialTime;
+  updateTimer();
+}
+function updateTimer() {
+  if(timer > 0) {
+    timerSlot.html(timer);
+    timer = timer - 1;
+    setTimeout(updateTimer, 1000);
+  } else {
+    timerSlot.html('_');
+    console.log('Timer expired!');
+  }
 }
 
 function handleDisconnection(data) {
   window.alert("Você foi desconectado. \n" + data);
   changeScreenStateTo('START_SCREEN');
+}
+
+function handleGameRoundEnded(data) {
+  window.alert("Acabou o tempo!");
 }

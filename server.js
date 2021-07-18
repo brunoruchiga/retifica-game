@@ -13,6 +13,8 @@ io.sockets.on('connection', handleConnection);
 
 let clients = [];
 
+let serverTimer;
+
 function handleConnection(socket) {
   console.log('New connection:' + socket.id);
   io.to(socket.id).emit('newSocketConnection');
@@ -121,6 +123,7 @@ function findUserByUsername(username) {
 function startNewGame() {
   let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
+  let totalTime = 30;
   let categories = [
     'Nome',
     'Fruta, Verdura ou Legume',
@@ -133,12 +136,26 @@ function startNewGame() {
 
   let gameRoundInfo = {
     randomLetter: randomLetter,
-    categories: categories
+    categories: categories,
+    totalTime: totalTime
   }
-
   io.emit('gameStarted', gameRoundInfo);
 
   console.log(gameRoundInfo);
 
-  //Iniciar timer
+  initializeTimer(totalTime);
+}
+
+function initializeTimer(initialTime) {
+  serverTimer = initialTime;
+  updateTimer();
+}
+function updateTimer() {
+  if(serverTimer > 0) {
+    serverTimer = serverTimer - 1;
+    setTimeout(updateTimer, 1000);
+  } else {
+    io.emit('serverTimerExpired');
+    console.log('Timer expired!');
+  }
 }
