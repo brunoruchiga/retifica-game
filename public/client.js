@@ -24,10 +24,11 @@ let categoriesContainer;
 
 function setup() {
   socket = io.connect(HOST);
-  socket.on('chatMessageSent', handleChatMessageReceived);
+  socket.on('newSocketConnection', handleNewSocketConnection);
   socket.on('userJoinedGame', handleUserJoinedGame);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('gameStarted', handleNewGame);
+  socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
 
   noCanvas();
@@ -54,8 +55,12 @@ function setup() {
   messagesContainer = createDiv('').id('messages-container').class('container').parent(containerBody);
   handleEnterKey(editableText, handleButtonClicked);
 
-  changeVisibility(containerBody, false);
+  changeScreenStateTo('START_SCREEN');
   usernameTextInput.elt.focus();
+}
+
+function handleNewSocketConnection(data) {
+  changeScreenStateTo('START_SCREEN');
 }
 
 function handleButtonClicked() {
@@ -90,8 +95,7 @@ function requestToJoinGame() {
 }
 
 function handleUserJoinedGame() {
-  changeVisibility(containerLogin, false);
-  changeVisibility(containerBody, true);
+  changeScreenStateTo('GAME');
   editableText.elt.focus();
 }
 
@@ -111,6 +115,17 @@ function handleActiveUsersListUpdated(data) {
   }
 }
 
+function changeScreenStateTo(newState) {
+  if(newState == 'START_SCREEN') {
+    changeVisibility(containerLogin, true);
+    changeVisibility(containerBody, false);
+  }
+  if(newState == 'GAME') {
+    changeVisibility(containerLogin, false);
+    changeVisibility(containerBody, true);
+  }
+}
+
 function startGame() {
   socket.emit('requestNewGame');
 }
@@ -126,5 +141,6 @@ function handleNewGame(data) {
 }
 
 function handleDisconnection(data) {
-  document.location.reload(true);
+  window.alert("Você foi desconectado. \n" + data);
+  changeScreenStateTo('START_SCREEN');
 }

@@ -15,6 +15,7 @@ let clients = [];
 
 function handleConnection(socket) {
   console.log('New connection:' + socket.id);
+  io.to(socket.id).emit('newSocketConnection');
 
   addNewClient(socket);
 
@@ -26,12 +27,17 @@ function handleConnection(socket) {
   function joinNewUserToGame(username) {
     //Try to find username already in list
     let user = findUserByUsername(username);
-    //If username was found already in list,disconnect old socket, and attribute this socket to the same user
+    //If username was found already in list...
     if(user) {
-      if(user.socket) {
-        user.socket.disconnect();
-      } else {
+      if(user.socket == undefined) { //...If there is no socket, attribute this socket to the same user
         user.socket = socket;
+      } else {
+        let differentUsernameGenerated = username;
+        let counter = 2;
+        while(findUserByUsername(differentUsernameGenerated + counter)) {
+          counter++;
+        }
+        changeUsername(differentUsernameGenerated + counter);
       }
     } else {
     //If username is not in list, attribute username to this socket
