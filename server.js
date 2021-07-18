@@ -18,8 +18,16 @@ function handleConnection(socket) {
 
   addNewUser(socket);
 
-  socket.on('messageSent', handleMessage)
-  socket.on('requestNewUsername', setUsername)
+  socket.on('messageSent', handleMessage);
+  socket.on('requestNewUsername', setUsername);
+  socket.on('requestNewGame', startNewGame);
+
+  io.on('connection', (socket) => {
+    socket.on("disconnect", (reason) => {
+      handleDisconnection(socket);
+    });
+  });
+
 
   function handleMessage(data) {
     console.log(socket.id, data);
@@ -31,15 +39,27 @@ function handleConnection(socket) {
   }
 
   function setUsername(data) {
-    console.log(data)
-    console.log(socket.id)
-    // console.log(clients)
+    console.log(data);
+    console.log(socket.id);
+    // console.log(clients);
     // data.socketId = socket.id;
     // data.socketIdIndex = clients.indexOf(socket.id);
     let user = getUser(socket.id);
     user.username = data;
     io.to(socket.id).emit('usernameChanged', user.username);
+    io.emit('activeUsersListUpdated', getListOfActiveUsernames());
   }
+}
+
+function handleDisconnection(disconnectedSocket) {
+  console.log('Disconnected: ' + disconnectedSocket.id);
+  for(let i = 0; i < clients.length; i++) {
+    if(clients[i].socket.id == disconnectedSocket.id) {
+      clients.splice(i, 1);
+      break;
+    }
+  }
+  io.emit('activeUsersListUpdated', getListOfActiveUsernames());
 }
 
 function addNewUser(socket) {
@@ -57,4 +77,39 @@ function getUser(id) {
     }
   }
   return undefined;
+}
+
+function getListOfActiveUsernames() {
+  let activeUsernames = [];
+  for(let i = 0; i < clients.length; i++) {
+    if(clients[i].username != '') {
+      activeUsernames.push(clients[i].username);
+    }
+  }
+  return activeUsernames;
+}
+
+function startNewGame() {
+  let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
+  let categories = [
+    'Nome',
+    'Fruta, Verdura ou Legume',
+    'Animal',
+    'Cidade, Estado ou País',
+    'Comida',
+    'Objeto',
+    'Filme ou Série'
+  ];
+
+  let gameRoundInfo = {
+    randomLetter: randomLetter,
+    categories: categories
+  }
+
+  io.emit('gameStarted', gameRoundInfo);
+
+  console.log(gameRoundInfo);
+
+  //Iniciar timer
 }
