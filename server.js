@@ -16,53 +16,65 @@ let clients = [];
 function handleConnection(socket) {
   console.log('New connection:' + socket.id);
 
-  addNewUser(socket);
+  addNewClient(socket);
 
-  socket.on('messageSent', handleMessage);
-  socket.on('requestNewUsername', setUsername);
+  socket.on('chatMessageSent', handleChatMessage);
+  socket.on('requestToJoinGame', joinNewUserToGame);
   socket.on('requestNewGame', startNewGame);
+  socket.on('disconnect', (reason) => handleDisconnection(socket));
 
-  io.on('connection', (socket) => {
-    socket.on("disconnect", (reason) => {
-      handleDisconnection(socket);
-    });
-  });
+  function joinNewUserToGame(username) {
+    //Try to find username already in list
+    let user = findUserByUsername(username);
+    //If username was found already in list,disconnect old socket, and attribute this socket to the same user
+    if(user) {
+      if(user.socket) {
+        user.socket.disconnect();
+      } else {
+        user.socket = socket;
+      }
+    } else {
+    //If username is not in list, attribute username to this socket
+      changeUsername(username);
+    }
 
+    io.to(socket.id).emit('userJoinedGame');
+    io.emit('activeUsersListUpdated', getListOfActiveUsernames());
+    console.log('New user joined game: ' + username + ' ' + socket.id);
+  }
 
-  function handleMessage(data) {
-    console.log(socket.id, data);
+  function changeUsername(newUsername) {
+    let user = getUser(socket.id);
+    if(user) {
+      user.username = newUsername;
+    }
+  }
+
+  function handleChatMessage(data) {
     data.socketId = socket.id;
     data.socketIdIndex = clients.indexOf(socket.id);
     let message = getUser(socket.id).username + ': ' + data;
-    io.emit('messageSent', message);
+    io.emit('chatMessageSent', message);
     //io.sockets.emit('message', data);
-  }
-
-  function setUsername(data) {
-    console.log(data);
-    console.log(socket.id);
-    // console.log(clients);
-    // data.socketId = socket.id;
-    // data.socketIdIndex = clients.indexOf(socket.id);
-    let user = getUser(socket.id);
-    user.username = data;
-    io.to(socket.id).emit('usernameChanged', user.username);
-    io.emit('activeUsersListUpdated', getListOfActiveUsernames());
+    console.log('Chat message sent:', socket.id, message);
   }
 }
 
 function handleDisconnection(disconnectedSocket) {
   console.log('Disconnected: ' + disconnectedSocket.id);
   for(let i = 0; i < clients.length; i++) {
-    if(clients[i].socket.id == disconnectedSocket.id) {
-      clients.splice(i, 1);
-      break;
+    if(clients[i].socket != undefined) {
+      if(clients[i].socket.id == disconnectedSocket.id) {
+        // clients.splice(i, 1);
+        clients[i].socket = undefined;
+        break;
+      }
     }
   }
   io.emit('activeUsersListUpdated', getListOfActiveUsernames());
 }
 
-function addNewUser(socket) {
+function addNewClient(socket) {
   let newClient = {
     username: '',
     socket: socket
@@ -72,8 +84,10 @@ function addNewUser(socket) {
 
 function getUser(id) {
   for(let i = 0; i < clients.length; i++) {
-    if(id == clients[i].socket.id) {
-      return clients[i];
+    if(clients[i].socket != undefined) {
+      if(id == clients[i].socket.id) {
+        return clients[i];
+      }
     }
   }
   return undefined;
@@ -82,11 +96,20 @@ function getUser(id) {
 function getListOfActiveUsernames() {
   let activeUsernames = [];
   for(let i = 0; i < clients.length; i++) {
-    if(clients[i].username != '') {
+    if(clients[i].socket) {
       activeUsernames.push(clients[i].username);
     }
   }
   return activeUsernames;
+}
+
+function findUserByUsername(username) {
+  for(let i = 0; i < clients.length; i++) {
+    if(clients[i].username == username) {
+      return clients[i];
+    }
+  }
+  return undefined;
 }
 
 function startNewGame() {

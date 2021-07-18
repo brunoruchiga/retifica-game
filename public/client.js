@@ -24,10 +24,11 @@ let categoriesContainer;
 
 function setup() {
   socket = io.connect(HOST);
-  socket.on('messageSent', handleMessageReceived);
-  socket.on('usernameChanged', handleUsernameInitialized);
+  socket.on('chatMessageSent', handleChatMessageReceived);
+  socket.on('userJoinedGame', handleUserJoinedGame);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('gameStarted', handleNewGame);
+  socket.on('disconnect', handleDisconnection);
 
   noCanvas();
 
@@ -35,10 +36,10 @@ function setup() {
   containerBody = createDiv().id('container-body');
 
   loginInstructions = createP('Escolha seu nome de usuário:').parent(containerLogin);
-  username = 'user' + nf(floor(random(0,10000)),4,0);
+  username = 'user' + nf(floor(random(0,1000000)),6,0);
   usernameTextInput = createInput(username).parent(containerLogin);
-  usernameConfirmButton = createButton('Entrar').mousePressed(requestNewUsername).parent(containerLogin);
-  handleEnterKey(usernameTextInput, requestNewUsername);
+  usernameConfirmButton = createButton('Entrar').mousePressed(requestToJoinGame).parent(containerLogin);
+  handleEnterKey(usernameTextInput, requestToJoinGame);
 
   startButton = createButton('Começar!').mousePressed(startGame).parent(containerBody);
 
@@ -63,7 +64,7 @@ function handleButtonClicked() {
   }
   let data = editableText.value();
   console.log("Sent:" + data);
-  socket.emit('messageSent', data);
+  socket.emit('chatMessageSent', data);
   editableText.value('');
 }
 
@@ -75,21 +76,20 @@ function changeVisibility(element, visible) {
   }
 }
 
-function handleMessageReceived(data) {
+function handleChatMessageReceived(data) {
   console.log("Received:" + data);
   createP(data).parent(messagesContainer);
   messagesContainer.elt.scrollTo(0,9999999999);
 }
 
-function requestNewUsername() {
+function requestToJoinGame() {
   if(usernameTextInput.value() == '') {
     return;
   }
-  socket.emit('requestNewUsername', usernameTextInput.value());
+  socket.emit('requestToJoinGame', usernameTextInput.value());
 }
 
-function handleUsernameInitialized(data) {
-  console.log("New username:" + data);
+function handleUserJoinedGame() {
   changeVisibility(containerLogin, false);
   changeVisibility(containerBody, true);
   editableText.elt.focus();
@@ -123,4 +123,8 @@ function handleNewGame(data) {
     createP(data.categories[i]).parent(categoriesContainer);
     createInput('').parent(categoriesContainer);
   }
+}
+
+function handleDisconnection(data) {
+  document.location.reload(true);
 }
