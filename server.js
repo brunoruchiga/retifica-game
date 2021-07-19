@@ -14,6 +14,7 @@ io.sockets.on('connection', handleConnection);
 let clients = [];
 
 let serverTimer;
+let activeCategoriesThisRound;
 
 function handleConnection(socket) {
   console.log('New connection:' + socket.id);
@@ -21,9 +22,10 @@ function handleConnection(socket) {
 
   addNewClient(socket);
 
-  socket.on('chatMessageSent', handleChatMessage);
   socket.on('requestToJoinGame', joinNewUserToGame);
   socket.on('requestNewGame', startNewGame);
+  socket.on('sendAnswer', handleAnswerSent);
+  socket.on('chatMessageSent', handleChatMessage);
   socket.on('disconnect', (reason) => handleDisconnection(socket));
 
   function joinNewUserToGame(username) {
@@ -59,9 +61,14 @@ function handleConnection(socket) {
     io.to(socket.id).emit('usernameChanged', newUsername);
   }
 
+  function handleAnswerSent(data) {
+    let user = getUser(socket.id);
+    if(user) {
+      user.answers.push(data);
+    }
+  }
+
   function handleChatMessage(data) {
-    data.socketId = socket.id;
-    data.socketIdIndex = clients.indexOf(socket.id);
     let message = getUser(socket.id).username + ': ' + data;
     io.emit('chatMessageSent', message);
     //io.sockets.emit('message', data);
@@ -74,7 +81,6 @@ function handleDisconnection(disconnectedSocket) {
   for(let i = 0; i < clients.length; i++) {
     if(clients[i].socket != undefined) {
       if(clients[i].socket.id == disconnectedSocket.id) {
-        // clients.splice(i, 1);
         clients[i].socket = undefined;
         break;
       }
@@ -86,7 +92,8 @@ function handleDisconnection(disconnectedSocket) {
 function addNewClient(socket) {
   let newClient = {
     username: '',
-    socket: socket
+    socket: socket,
+    answers: []
   }
   clients.push(newClient);
 }
@@ -121,23 +128,29 @@ function findUserByUsername(username) {
   return undefined;
 }
 
+
+///////////////////////////
+//Game logic
+
 function startNewGame() {
+  for(let i = 0; i < clients.length; i++) {
+    clients[i].answers = [];
+  }
+
   let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
-  let totalTime = 30;
-  let categories = [
-    'Nome',
-    'Fruta, Verdura ou Legume',
-    'Animal',
-    'Cidade, Estado ou País',
-    'Comida',
-    'Objeto',
-    'Filme ou Série'
+  let totalTime = 60;
+  activeCategoriesThisRound = [
+    'Nome de idoso',
+    'Lugar que chorei',
+    'Sabor de miojo',
+    'Presente criativo',
+    'Artista ruim'
   ];
 
   let gameRoundInfo = {
     randomLetter: randomLetter,
-    categories: categories,
+    categories: activeCategoriesThisRound,
     totalTime: totalTime
   }
   io.emit('gameStarted', gameRoundInfo);
@@ -158,5 +171,30 @@ function updateTimer() {
   } else {
     io.emit('serverTimerExpired');
     console.log('Timer expired!');
+    console.log(getAnswersForAllCategories());
+    io.emit('presentAllAnswers', getAnswersForAllCategories());
   }
+}
+
+function getAnswersForAllCategories() {
+  let answersForAllCategories = [];
+  for(let categoryIndex = 0; categoryIndex < activeCategoriesThisRound.length; categoryIndex++) {
+    let categoryAnswer = {
+      category: activeCategoriesThisRound[categoryIndex],
+      answers: []
+    }
+    answersForAllCategories.push(categoryAnswer);
+    for(let clientIndex = 0; clientIndex < clients.length; clientIndex++) {
+      for(let i = 0; i < clients[clientIndex].answers.length; i++) {
+        if(clients[clientIndex].answers[i].question == activeCategoriesThisRound[categoryIndex]) {
+          let answer = {
+            answerString: clients[clientIndex].answers[i].answerString,
+            authorUsername: clients[clientIndex].username
+          }
+          answersForAllCategories[categoryIndex].answers.push(answer);
+        }
+      }
+    }
+  }
+  return answersForAllCategories;
 }

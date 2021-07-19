@@ -13,3 +13,4 @@ respostas preenchidas
 - Servidor recebe respostas e organiza para exibição
 - Quando a rodada é encerrada, respostas são exibidas
 - Jogo pode ser reiniciado
+- Timer leva em consideração horário inicial

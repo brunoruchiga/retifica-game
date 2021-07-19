@@ -22,6 +22,11 @@ let gameRoundContainer;
 let randomLetterSlot;
 let timerSlot;
 let categoriesContainer;
+let currentCategory;
+let categoryTextInput;
+let confirmCategoryButton;
+let currentCategoryIndex;
+let categoriesList;
 
 let timer;
 
@@ -33,6 +38,7 @@ function setup() {
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('gameStarted', handleNewGame);
   socket.on('serverTimerExpired', handleGameRoundEnded);
+  socket.on('presentAllAnswers', presentAllAnswers);
   socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
 
@@ -54,6 +60,12 @@ function setup() {
   randomLetterSlot = select('#random-letter');
   timerSlot = select('#timer');
   categoriesContainer = select('#categories-container');
+  currentCategory = select('#current-category');
+  categoryTextInput = select('#category-input');
+  confirmCategoryButton = select('#confirm-category').mousePressed(confirmCategory);
+  handleEnterKey(categoryTextInput, confirmCategory);
+  currentCategoryIndex = 0;
+  categoriesList = [];
 
   chatContainer = select('#chat-container');
   chatMessageInput = select('#chat-message-input');
@@ -156,11 +168,15 @@ function startGame() {
 function handleNewGame(data) {
   randomLetterSlot.html(data.randomLetter);
 
-  categoriesContainer.html('');
-  for(let i = 0; i < data.categories.length; i++) {
-    createP(data.categories[i]).parent(categoriesContainer);
-    createInput('').parent(categoriesContainer);
-  }
+  categoriesList = data.categories;
+  currentCategoryIndex = 0;
+  currentCategory.html(categoriesList[currentCategoryIndex]);
+  categoryTextInput.value('');
+  // categoriesContainer.html('');
+  // for(let i = 0; i < data.categories.length; i++) {
+  //   createP(data.categories[i]).parent(categoriesContainer);
+  //   createInput('').parent(categoriesContainer);
+  // }
 
   initializeTimer(data.totalTime);
 
@@ -182,6 +198,30 @@ function updateTimer() {
   }
 }
 
+function confirmCategory() {
+  let answer = createAnswer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
+  socket.emit('sendAnswer', answer);
+  if(currentCategoryIndex + 1 < categoriesList.length) {
+    currentCategoryIndex++;
+    currentCategory.html(categoriesList[currentCategoryIndex]);
+    categoryTextInput.value('');
+  } else {
+    //Finished
+    currentCategory.html('');
+    categoryTextInput.value('');
+    window.alert("Respostas enviadas!");    
+  }
+}
+
+function createAnswer(questionIndex, question, answerString) {
+  let answer = {
+    questionIndex: questionIndex,
+    question: question,
+    answerString: answerString
+  }
+  return answer;
+}
+
 function handleDisconnection(data) {
   window.alert("Você foi desconectado. \n" + data);
   changeScreenStateTo('START_SCREEN');
@@ -189,4 +229,8 @@ function handleDisconnection(data) {
 
 function handleGameRoundEnded(data) {
   window.alert("Acabou o tempo!");
+}
+
+function presentAllAnswers(data) {
+  console.log(data);
 }
