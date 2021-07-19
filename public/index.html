@@ -79,5 +79,31 @@
   </head>
 
   <body>
+    <div id='container-login'>
+      <p>Escolha seu nome de usuário:</p>
+      <input type='text' id='username-input' maxlength='20' autofocus/>
+      <button id='join-button'>Entrar</button>
+    </div>
+    <div id='container-body'>
+      <button id='start-button'>Começar!</button>
+      <div id='usernames-list-container' class='container'>
+        <p>Usuários conectados:</p>
+        <div id='usernames-list'></div>
+      </div>
+      <div id='game-round-container' class='container'>
+        <p id='random-letter'>_</p>
+        <p id='timer'>_</p>
+        <div id='categories-container' class='container'></div>
+      </div>
+
+      <hr>
+
+      <div id='chat-container' class='container'>
+        <p>Chat:</p>
+        <input type='text' id='chat-message-input' maxlength='240'/>
+        <button id='send-message-button'>Enviar</button>
+        <div id='messages-container' class='container'></div>
+      </div>
+    </div>
   </body>
 </html>

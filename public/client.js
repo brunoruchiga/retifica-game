@@ -6,13 +6,11 @@ let socket;
 let containerLogin;
 let containerBody;
 
-let loginInstructions;
-let username;
 let usernameTextInput;
 let usernameConfirmButton;
 
-let messagesInstructions;
-let editableText;
+let chatContainer;
+let chatMessageInput;
 let button1;
 let messagesContainer;
 
@@ -39,32 +37,30 @@ function setup() {
 
   noCanvas();
 
-  containerLogin = createDiv().id('container-login');
-  containerBody = createDiv().id('container-body');
+  containerLogin = select('#container-login');
+  containerBody = select('#container-body');
 
-  loginInstructions = createP('Escolha seu nome de usuário:').parent(containerLogin);
-  username = 'user' + nf(floor(random(0,1000000)),6,0);
-  usernameTextInput = createInput(username).parent(containerLogin);
-  usernameConfirmButton = createButton('Entrar').mousePressed(requestToJoinGame).parent(containerLogin);
+  let randomUsername = 'user' + nf(floor(random(0,1000000)),6,0);
+  usernameTextInput = select('#username-input').value(randomUsername).input(validateUsername);
+  usernameConfirmButton = select('#join-button').mousePressed(requestToJoinGame);
   handleEnterKey(usernameTextInput, requestToJoinGame);
 
-  startButton = createButton('Começar!').mousePressed(startGame).parent(containerBody);
+  startButton = select('#start-button').mousePressed(startGame);
 
-  activeUsernamesListContainer = createDiv('').id('usernames-list').class('container').parent(containerBody);
+  activeUsernamesListContainer = select('#usernames-list');
 
-  gameRoundContainer = createDiv('').id('game-round-container').class('container').parent(containerBody);
-  randomLetterSlot = createP('_').id('random-letter').parent(gameRoundContainer);
-  timerSlot = createP('_').id('timer').parent(gameRoundContainer);
-  categoriesContainer = createDiv('').id('categories-container').parent(gameRoundContainer);
+  gameRoundContainer = select('#game-round-container');
+  randomLetterSlot = select('#random-letter');
+  timerSlot = select('#timer');
+  categoriesContainer = select('#categories-container');
 
-  messagesInstructions = createP('<br><br><br><br><br><br>Chat:').parent(containerBody);
-  editableText = createInput('').parent(containerBody);
-  button1 = createButton('Enviar').mousePressed(handleButtonClicked).parent(containerBody);
-  messagesContainer = createDiv('').id('messages-container').class('container').parent(containerBody);
-  handleEnterKey(editableText, handleButtonClicked);
+  chatContainer = select('#chat-container');
+  chatMessageInput = select('#chat-message-input');
+  button1 = select('#send-message-button').mousePressed(handleButtonClicked);
+  messagesContainer = select('#messages-container');
+  handleEnterKey(chatMessageInput, handleButtonClicked);
 
   changeScreenStateTo('START_SCREEN');
-  usernameTextInput.elt.focus();
 }
 
 function handleNewSocketConnection(data) {
@@ -72,13 +68,13 @@ function handleNewSocketConnection(data) {
 }
 
 function handleButtonClicked() {
-  if(editableText.value() == '') {
+  if(chatMessageInput.value() == '') {
     return;
   }
-  let data = editableText.value();
+  let data = chatMessageInput.value();
   console.log("Sent:" + data);
   socket.emit('chatMessageSent', data);
-  editableText.value('');
+  chatMessageInput.value('');
 }
 
 function changeVisibility(element, visible) {
@@ -102,9 +98,15 @@ function requestToJoinGame() {
   socket.emit('requestToJoinGame', usernameTextInput.value());
 }
 
+function validateUsername() {
+  console.log(usernameTextInput.value());
+  let filteredUsername = usernameTextInput.value().replace(/[^a-zÀ-ÿ0-9_. ]/ig, '');
+  console.log(filteredUsername);
+  usernameTextInput.value(filteredUsername);
+}
+
 function handleUserJoinedGame() {
   changeScreenStateTo('LOBBY');
-  editableText.elt.focus();
 }
 
 function handleEnterKey(textInput, f) {
