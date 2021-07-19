@@ -6,6 +6,7 @@ let socket;
 let containerLogin;
 let containerBody;
 
+let username;
 let usernameTextInput;
 let usernameConfirmButton;
 
@@ -28,20 +29,20 @@ function setup() {
   socket = io.connect(HOST);
   socket.on('newSocketConnection', handleNewSocketConnection);
   socket.on('userJoinedGame', handleUserJoinedGame);
+  socket.on('usernameChanged', handleUsernameChanged);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('gameStarted', handleNewGame);
   socket.on('serverTimerExpired', handleGameRoundEnded);
   socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
 
-
   noCanvas();
 
   containerLogin = select('#container-login');
   containerBody = select('#container-body');
 
-  let randomUsername = 'user' + nf(floor(random(0,1000000)),6,0);
-  usernameTextInput = select('#username-input').value(randomUsername).input(validateUsername);
+  username = 'user' + nf(floor(random(0,1000000)),6,0);
+  usernameTextInput = select('#username-input').value(username).input(validateUsername);
   usernameConfirmButton = select('#join-button').mousePressed(requestToJoinGame);
   handleEnterKey(usernameTextInput, requestToJoinGame);
 
@@ -98,10 +99,13 @@ function requestToJoinGame() {
   socket.emit('requestToJoinGame', usernameTextInput.value());
 }
 
+function handleUsernameChanged(data) {
+  username = data;
+}
+
 function validateUsername() {
   console.log(usernameTextInput.value());
   let filteredUsername = usernameTextInput.value().replace(/[^a-zÀ-ÿ0-9_. ]/ig, '');
-  console.log(filteredUsername);
   usernameTextInput.value(filteredUsername);
 }
 
@@ -127,6 +131,7 @@ function handleActiveUsersListUpdated(data) {
 
 function changeScreenStateTo(newState) {
   if(newState == 'START_SCREEN') {
+    usernameTextInput.value(username);
     changeVisibility(containerLogin, true);
     changeVisibility(containerBody, false);
   }

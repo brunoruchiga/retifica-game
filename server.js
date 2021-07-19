@@ -46,7 +46,7 @@ function handleConnection(socket) {
       changeUsername(username);
     }
 
-    io.to(socket.id).emit('userJoinedGame');
+    io.to(socket.id).emit('userJoinedGame', );
     io.emit('activeUsersListUpdated', getListOfActiveUsernames());
     console.log('New user joined game: ' + username + ' ' + socket.id);
   }
@@ -56,6 +56,7 @@ function handleConnection(socket) {
     if(user) {
       user.username = newUsername;
     }
+    io.to(socket.id).emit('usernameChanged', newUsername);
   }
 
   function handleChatMessage(data) {
