@@ -209,7 +209,7 @@ function confirmCategory() {
     //Finished
     currentCategory.html('');
     categoryTextInput.value('');
-    window.alert("Respostas enviadas!");    
+    window.alert("Respostas enviadas!");
   }
 }
 

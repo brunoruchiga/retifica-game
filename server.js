@@ -8,7 +8,9 @@ const server = app.listen(PORT);
 app.use(express.static('public'));
 
 let socket = require('socket.io');
-let io = socket(server);
+let io = socket(server, {
+  pingTimeout: 5*60*1000
+});
 io.sockets.on('connection', handleConnection);
 
 let clients = [];
@@ -17,7 +19,7 @@ let serverTimer;
 let activeCategoriesThisRound;
 
 function handleConnection(socket) {
-  console.log('New connection:' + socket.id);
+  console.log('New connection: ' + socket.id);
   io.to(socket.id).emit('newSocketConnection');
 
   addNewClient(socket);
