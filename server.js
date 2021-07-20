@@ -8,27 +8,23 @@ const server = app.listen(PORT);
 app.use(express.static('public'));
 
 let socket = require('socket.io');
-let io = socket(server, {
-  pingTimeout: 5*60*1000
-});
+let io = socket(server, {pingTimeout: 30*60*1000});
 io.sockets.on('connection', handleConnection);
 
 let clients = [];
-
-let serverTimer;
-let activeCategoriesThisRound;
+let gameInstance = new GameInstance();
 
 function handleConnection(socket) {
-  console.log('New connection: ' + socket.id);
+  console.log('Socket connected: ' + socket.id);
   io.to(socket.id).emit('newSocketConnection');
 
-  addNewClient(socket);
+  clients.push(new Client(socket));
 
   socket.on('requestToJoinGame', joinNewUserToGame);
-  socket.on('requestNewGame', startNewGame);
+  socket.on('requestNewGame', gameInstance.start);
   socket.on('sendAnswer', handleAnswerSent);
   socket.on('chatMessageSent', handleChatMessage);
-  socket.on('disconnect', (reason) => handleDisconnection(socket));
+  socket.on('disconnect', handleDisconnection);
 
   function joinNewUserToGame(username) {
     //Try to find username already in list
@@ -76,28 +72,25 @@ function handleConnection(socket) {
     //io.sockets.emit('message', data);
     console.log('Chat message sent:', socket.id, message);
   }
-}
 
-function handleDisconnection(disconnectedSocket) {
-  console.log('Disconnected: ' + disconnectedSocket.id);
-  for(let i = 0; i < clients.length; i++) {
-    if(clients[i].socket != undefined) {
-      if(clients[i].socket.id == disconnectedSocket.id) {
-        clients[i].socket = undefined;
-        break;
+  function handleDisconnection(reason) {
+    console.log('Socket disconnected: ' + socket.id);
+    for(let i = 0; i < clients.length; i++) {
+      if(clients[i].socket != undefined) {
+        if(clients[i].socket.id == socket.id) {
+          clients[i].socket = undefined;
+          break;
+        }
       }
     }
+    io.emit('activeUsersListUpdated', getListOfActiveUsernames());
   }
-  io.emit('activeUsersListUpdated', getListOfActiveUsernames());
 }
 
-function addNewClient(socket) {
-  let newClient = {
-    username: '',
-    socket: socket,
-    answers: []
-  }
-  clients.push(newClient);
+function Client(socket) {
+  this.username = '';
+  this.socket = socket,
+  this.answer = [];
 }
 
 function getUser(id) {
@@ -134,69 +127,75 @@ function findUserByUsername(username) {
 ///////////////////////////
 //Game logic
 
-function startNewGame() {
-  for(let i = 0; i < clients.length; i++) {
-    clients[i].answers = [];
+function GameInstance() {
+  this.serverTimer;
+  this.gameRoundInfo;
+
+  this.initializeTimer = function(initialTime) {
+    this.serverTimer = initialTime;
+    gameInstance.updateTimer();
   }
-
-  let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
-  let totalTime = 60;
-  activeCategoriesThisRound = [
-    'Nome de idoso',
-    'Lugar que chorei',
-    'Sabor de miojo',
-    'Presente criativo',
-    'Artista ruim'
-  ];
-
-  let gameRoundInfo = {
-    randomLetter: randomLetter,
-    categories: activeCategoriesThisRound,
-    totalTime: totalTime
-  }
-  io.emit('gameStarted', gameRoundInfo);
-
-  console.log(gameRoundInfo);
-
-  initializeTimer(totalTime);
-}
-
-function initializeTimer(initialTime) {
-  serverTimer = initialTime;
-  updateTimer();
-}
-function updateTimer() {
-  if(serverTimer > 0) {
-    serverTimer = serverTimer - 1;
-    setTimeout(updateTimer, 1000);
-  } else {
-    io.emit('serverTimerExpired');
-    console.log('Timer expired!');
-    console.log(getAnswersForAllCategories());
-    io.emit('presentAllAnswers', getAnswersForAllCategories());
-  }
-}
-
-function getAnswersForAllCategories() {
-  let answersForAllCategories = [];
-  for(let categoryIndex = 0; categoryIndex < activeCategoriesThisRound.length; categoryIndex++) {
-    let categoryAnswer = {
-      category: activeCategoriesThisRound[categoryIndex],
-      answers: []
+  this.updateTimer = function() {
+    if(this.serverTimer > 0) {
+      this.serverTimer = this.serverTimer - 1;
+      setTimeout(gameInstance.updateTimer, 1000);
+    } else {
+      io.emit('serverTimerExpired');
+      console.log('Timer expired!');
+      console.log(getAnswersForAllCategories());
+      io.emit('presentAllAnswers', getAnswersForAllCategories());
     }
-    answersForAllCategories.push(categoryAnswer);
-    for(let clientIndex = 0; clientIndex < clients.length; clientIndex++) {
-      for(let i = 0; i < clients[clientIndex].answers.length; i++) {
-        if(clients[clientIndex].answers[i].question == activeCategoriesThisRound[categoryIndex]) {
-          let answer = {
-            answerString: clients[clientIndex].answers[i].answerString,
-            authorUsername: clients[clientIndex].username
+  }
+
+  this.start = function() {
+    for(let i = 0; i < clients.length; i++) {
+      clients[i].answers = [];
+    }
+
+    let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
+    let totalTime = 60;
+    let activeCategoriesThisRound = [
+      'Nome de idoso',
+      'Lugar que chorei',
+      'Sabor de miojo',
+      'Presente criativo',
+      'Artista ruim'
+    ];
+
+    this.gameRoundInfo = {
+      randomLetter: randomLetter,
+      categories: activeCategoriesThisRound,
+      totalTime: totalTime
+    }
+    io.emit('gameStarted', this.gameRoundInfo);
+
+    console.log(this.gameRoundInfo);
+
+    console.log(this);
+    gameInstance.initializeTimer(totalTime);
+  }
+
+  this.getAnswersForAllCategories = function() {
+    let answersForAllCategories = [];
+    for(let categoryIndex = 0; categoryIndex < this.gameRoundInfo.categories.length; categoryIndex++) {
+      let categoryAnswer = {
+        category: this.gameRoundInfo.categories[categoryIndex],
+        answers: []
+      }
+      answersForAllCategories.push(categoryAnswer);
+      for(let clientIndex = 0; clientIndex < clients.length; clientIndex++) {
+        for(let i = 0; i < clients[clientIndex].answers.length; i++) {
+          if(clients[clientIndex].answers[i].question == this.gameRoundInfo.categories[categoryIndex]) {
+            let answer = {
+              answerString: clients[clientIndex].answers[i].answerString,
+              authorUsername: clients[clientIndex].username
+            }
+            answersForAllCategories[categoryIndex].answers.push(answer);
           }
-          answersForAllCategories[categoryIndex].answers.push(answer);
         }
       }
     }
+    return answersForAllCategories;
   }
-  return answersForAllCategories;
 }
