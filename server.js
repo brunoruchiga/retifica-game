@@ -9,26 +9,23 @@ app.use(express.static('public'));
 
 let socket = require('socket.io');
 let io = socket(server, {
-  pingTimeout: 5*60*1000
+  pingTimeout: 30*60*1000
 });
 io.sockets.on('connection', handleConnection);
 
 let clients = [];
 
-let serverTimer;
-let activeCategoriesThisRound;
-
 function handleConnection(socket) {
   console.log('New connection: ' + socket.id);
   io.to(socket.id).emit('newSocketConnection');
 
-  addNewClient(socket);
+  clients.push(new Client(socket));
 
   socket.on('requestToJoinGame', joinNewUserToGame);
   socket.on('requestNewGame', startNewGame);
   socket.on('sendAnswer', handleAnswerSent);
   socket.on('chatMessageSent', handleChatMessage);
-  socket.on('disconnect', (reason) => handleDisconnection(socket));
+  socket.on('disconnect', handleDisconnection);
 
   function joinNewUserToGame(username) {
     //Try to find username already in list
@@ -76,28 +73,25 @@ function handleConnection(socket) {
     //io.sockets.emit('message', data);
     console.log('Chat message sent:', socket.id, message);
   }
-}
 
-function handleDisconnection(disconnectedSocket) {
-  console.log('Disconnected: ' + disconnectedSocket.id);
-  for(let i = 0; i < clients.length; i++) {
-    if(clients[i].socket != undefined) {
-      if(clients[i].socket.id == disconnectedSocket.id) {
-        clients[i].socket = undefined;
-        break;
+  function handleDisconnection(reason) {
+    console.log('Disconnected: ' + socket.id);
+    for(let i = 0; i < clients.length; i++) {
+      if(clients[i].socket != undefined) {
+        if(clients[i].socket.id == socket.id) {
+          clients[i].socket = undefined;
+          break;
+        }
       }
     }
+    io.emit('activeUsersListUpdated', getListOfActiveUsernames());
   }
-  io.emit('activeUsersListUpdated', getListOfActiveUsernames());
 }
 
-function addNewClient(socket) {
-  let newClient = {
-    username: '',
-    socket: socket,
-    answers: []
-  }
-  clients.push(newClient);
+function Client(socket) {
+  this.username = '';
+  this.socket = socket,
+  this.answer = [];
 }
 
 function getUser(id) {
@@ -134,6 +128,9 @@ function findUserByUsername(username) {
 ///////////////////////////
 //Game logic
 
+let serverTimer;
+let gameRoundInfo;
+
 function startNewGame() {
   for(let i = 0; i < clients.length; i++) {
     clients[i].answers = [];
@@ -142,7 +139,7 @@ function startNewGame() {
   let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
   let totalTime = 60;
-  activeCategoriesThisRound = [
+  let activeCategoriesThisRound = [
     'Nome de idoso',
     'Lugar que chorei',
     'Sabor de miojo',
@@ -180,15 +177,15 @@ function updateTimer() {
 
 function getAnswersForAllCategories() {
   let answersForAllCategories = [];
-  for(let categoryIndex = 0; categoryIndex < activeCategoriesThisRound.length; categoryIndex++) {
+  for(let categoryIndex = 0; categoryIndex < gameRoundInfo.categories.length; categoryIndex++) {
     let categoryAnswer = {
-      category: activeCategoriesThisRound[categoryIndex],
+      category: gameRoundInfo.categories[categoryIndex],
       answers: []
     }
     answersForAllCategories.push(categoryAnswer);
     for(let clientIndex = 0; clientIndex < clients.length; clientIndex++) {
       for(let i = 0; i < clients[clientIndex].answers.length; i++) {
-        if(clients[clientIndex].answers[i].question == activeCategoriesThisRound[categoryIndex]) {
+        if(clients[clientIndex].answers[i].question == gameRoundInfo.categories[categoryIndex]) {
           let answer = {
             answerString: clients[clientIndex].answers[i].answerString,
             authorUsername: clients[clientIndex].username
