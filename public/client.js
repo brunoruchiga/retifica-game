@@ -7,15 +7,13 @@ let containerLogin;
 let containerBody;
 
 let username;
-let usernameTextInput;
-let usernameConfirmButton;
-
-let chatContainer;
-let chatMessageInput;
-let button1;
-let messagesContainer;
+let usernameSelection = {
+  textInput: undefined,
+  confirmButton: undefined
+};
 
 let startButton;
+
 let activeUsernamesListContainer;
 
 let gameRoundContainer;
@@ -29,6 +27,13 @@ let currentCategoryIndex;
 let categoriesList;
 
 let timer;
+
+let chat = {
+  container: undefined,
+  messageInput: undefined,
+  sendButton: undefined,
+  messagesContainer: undefined
+};
 
 function setup() {
   socket = io.connect(HOST);
@@ -48,9 +53,9 @@ function setup() {
   containerBody = select('#container-body');
 
   username = 'user' + nf(floor(random(0,1000000)),6,0);
-  usernameTextInput = select('#username-input').value(username).input(validateUsername);
+  usernameSelection.textInput = select('#username-input').value(username).input(validateUsername);
   usernameConfirmButton = select('#join-button').mousePressed(requestToJoinGame);
-  handleEnterKey(usernameTextInput, requestToJoinGame);
+  handleEnterKey(usernameSelection.textInput, requestToJoinGame);
 
   startButton = select('#start-button').mousePressed(startGame);
 
@@ -67,11 +72,11 @@ function setup() {
   currentCategoryIndex = 0;
   categoriesList = [];
 
-  chatContainer = select('#chat-container');
-  chatMessageInput = select('#chat-message-input');
-  button1 = select('#send-message-button').mousePressed(handleButtonClicked);
-  messagesContainer = select('#messages-container');
-  handleEnterKey(chatMessageInput, handleButtonClicked);
+  chat.container = select('#chat-container');
+  chat.messageInput = select('#chat-message-input');
+  chat.sendButton = select('#send-message-button').mousePressed(handleButtonClicked);
+  chat.messagesContainer = select('#messages-container');
+  handleEnterKey(chat.messageInput, handleButtonClicked);
 
   changeScreenStateTo('START_SCREEN');
 }
@@ -81,13 +86,13 @@ function handleNewSocketConnection(data) {
 }
 
 function handleButtonClicked() {
-  if(chatMessageInput.value() == '') {
+  if(chat.messageInput.value() == '') {
     return;
   }
-  let data = chatMessageInput.value();
+  let data = chat.messageInput.value();
   console.log("Sent:" + data);
   socket.emit('chatMessageSent', data);
-  chatMessageInput.value('');
+  chat.messageInput.value('');
 }
 
 function changeVisibility(element, visible) {
@@ -100,15 +105,15 @@ function changeVisibility(element, visible) {
 
 function handleChatMessageReceived(data) {
   console.log("Received:" + data);
-  createP(data).parent(messagesContainer);
-  messagesContainer.elt.scrollTo(0,9999999999);
+  createP(data).parent(chat.messagesContainer);
+  chat.messagesContainer.elt.scrollTo(0,9999999999);
 }
 
 function requestToJoinGame() {
-  if(usernameTextInput.value() == '') {
+  if(usernameSelection.textInput.value() == '') {
     return;
   }
-  socket.emit('requestToJoinGame', usernameTextInput.value());
+  socket.emit('requestToJoinGame', usernameSelection.textInput.value());
 }
 
 function handleUsernameChanged(data) {
@@ -116,9 +121,9 @@ function handleUsernameChanged(data) {
 }
 
 function validateUsername() {
-  console.log(usernameTextInput.value());
-  let filteredUsername = usernameTextInput.value().replace(/[^a-zÀ-ÿ0-9_. ]/ig, '');
-  usernameTextInput.value(filteredUsername);
+  console.log(usernameSelection.textInput.value());
+  let filteredUsername = usernameSelection.textInput.value().replace(/[^a-zÀ-ÿ0-9_. ]/ig, '');
+  usernameSelection.textInput.value(filteredUsername);
 }
 
 function handleUserJoinedGame() {
@@ -143,7 +148,7 @@ function handleActiveUsersListUpdated(data) {
 
 function changeScreenStateTo(newState) {
   if(newState == 'START_SCREEN') {
-    usernameTextInput.value(username);
+    usernameSelection.textInput.value(username);
     changeVisibility(containerLogin, true);
     changeVisibility(containerBody, false);
   }
