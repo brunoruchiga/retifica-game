@@ -3,14 +3,14 @@
 - Lobby tem botão de "iniciar"
 - Jogo sorteia letra
 - Usuários recebem lista de Categorias e espaço para preencher
-
---x--
-
 - Jogo tem timer
 - Quando timer expira, rodada é encerrada
 - Quando a rodada é encerrada, usuários enviam automaticamente
 respostas preenchidas
 - Servidor recebe respostas e organiza para exibição
+
+--x--
+
 - Quando a rodada é encerrada, respostas são exibidas
 - Jogo pode ser reiniciado
 - Timer leva em consideração horário inicial

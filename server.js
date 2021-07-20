@@ -147,7 +147,7 @@ function startNewGame() {
     'Artista ruim'
   ];
 
-  let gameRoundInfo = {
+  gameRoundInfo = {
     randomLetter: randomLetter,
     categories: activeCategoriesThisRound,
     totalTime: totalTime
@@ -184,13 +184,15 @@ function getAnswersForAllCategories() {
     }
     answersForAllCategories.push(categoryAnswer);
     for(let clientIndex = 0; clientIndex < clients.length; clientIndex++) {
-      for(let i = 0; i < clients[clientIndex].answers.length; i++) {
-        if(clients[clientIndex].answers[i].question == gameRoundInfo.categories[categoryIndex]) {
-          let answer = {
-            answerString: clients[clientIndex].answers[i].answerString,
-            authorUsername: clients[clientIndex].username
+      if(clients[clientIndex].answers) {
+        for(let i = 0; i < clients[clientIndex].answers.length; i++) {
+          if(clients[clientIndex].answers[i].question == gameRoundInfo.categories[categoryIndex]) {
+            let answer = {
+              answerString: clients[clientIndex].answers[i].answerString,
+              authorUsername: clients[clientIndex].username
+            }
+            answersForAllCategories[categoryIndex].answers.push(answer);
           }
-          answersForAllCategories[categoryIndex].answers.push(answer);
         }
       }
     }

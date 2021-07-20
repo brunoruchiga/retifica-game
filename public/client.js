@@ -3,6 +3,7 @@ console.log('Client code loaded')
 const HOST = location.origin.replace(/^http/, 'ws')
 let socket;
 
+let mainContainer;
 let containerLogin;
 let containerBody;
 
@@ -49,6 +50,7 @@ function setup() {
 
   noCanvas();
 
+  mainContainer = select('#main-container');
   containerLogin = select('#container-login');
   containerBody = select('#container-body');
 
@@ -78,6 +80,7 @@ function setup() {
   chat.messagesContainer = select('#messages-container');
   handleEnterKey(chat.messageInput, handleButtonClicked);
 
+  changeVisibility(mainContainer, true);
   changeScreenStateTo('START_SCREEN');
 }
 
