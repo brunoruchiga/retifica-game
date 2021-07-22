@@ -275,12 +275,17 @@
       .hidden {
         display: none;
       }
+      .animate-show{animation:showElement 0.2s}@keyframes showElement{from{opacity:0} to{opacity:1}}
+      .animate-hide{animation:hideElement 0.2s}@keyframes hideElement{from{opacity:1} to{opacity:0}}
     </style>
 
   </head>
 
   <body>
     <div id='main-container' class='hidden w3-container'>
+      <div id='warnings' class='w3-panel w3-pale-yellow' style='cursor:pointer;' onclick="changeVisibility(warningContainer, false)" >
+        <p id='warning-message'>Alo</p>
+      </div>
       <h1 style="font-size: 8vw;">[RETIFICADO]</h1>
       <div id='container-login' class='w3-panel'>
         <!-- <p>Escolha seu nome de usuário:</p> -->

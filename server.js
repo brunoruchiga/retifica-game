@@ -26,13 +26,13 @@ function handleConnection(socket) {
 
   clients.push(new Client(socket));
 
-  socket.on('requestToJoinGame', joinNewUserToGame);
+  socket.on('requestToJoinRoom', joinNewUserToRoom);
   socket.on('requestNewGame', startNewGame);
   socket.on('sendAnswer', handleAnswerSent);
   socket.on('chatMessageSent', handleChatMessage);
   socket.on('disconnect', handleDisconnection);
 
-  function joinNewUserToGame(username) {
+  function joinNewUserToRoom(username) {
     //Try to find username already in list
     let user = findUserByUsername(username);
     //If username was found already in list...
@@ -62,7 +62,7 @@ function handleConnection(socket) {
     if(user) {
       user.username = newUsername;
     }
-    io.to(socket.id).emit('usernameChanged', newUsername);
+    io.to(socket.id).emit('usernameConfirmed', newUsername);
   }
 
   function handleAnswerSent(data) {
