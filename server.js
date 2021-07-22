@@ -14,6 +14,11 @@ let io = socket(server, {
 io.sockets.on('connection', handleConnection);
 
 let clients = [];
+let gameState = {
+  state: 'waiting',
+  roundInfo: undefined,
+  results: undefined
+};
 
 function handleConnection(socket) {
   console.log('New connection: ' + socket.id);
@@ -47,7 +52,7 @@ function handleConnection(socket) {
       changeUsername(username);
     }
 
-    io.to(socket.id).emit('userJoinedGame', );
+    io.to(socket.id).emit('userJoinedGame', gameState);
     io.emit('activeUsersListUpdated', getListOfActiveUsernames());
     console.log('New user joined game: ' + username + ' ' + socket.id);
   }
@@ -63,7 +68,9 @@ function handleConnection(socket) {
   function handleAnswerSent(data) {
     let user = getUser(socket.id);
     if(user) {
-      user.answers.push(data);
+      if(user.answers) {
+        user.answers.push(data);
+      }
     }
   }
 
@@ -129,9 +136,10 @@ function findUserByUsername(username) {
 //Game logic
 
 let serverTimer;
-let gameRoundInfo;
 
 function startNewGame() {
+  gameState.state = 'playing';
+
   for(let i = 0; i < clients.length; i++) {
     clients[i].answers = [];
   }
@@ -147,27 +155,31 @@ function startNewGame() {
     'Artista ruim'
   ];
 
-  gameRoundInfo = {
+  gameState.roundInfo = {
     randomLetter: randomLetter,
     categories: activeCategoriesThisRound,
     totalTime: totalTime
   }
-  io.emit('gameStarted', gameRoundInfo);
+  io.emit('gameStarted', gameState.roundInfo);
 
-  console.log(gameRoundInfo);
+  console.log(gameState.roundInfo);
 
   initializeTimer(totalTime);
 }
 
+let timerSetTimeoutFunction;
 function initializeTimer(initialTime) {
+  clearTimeout(timerSetTimeoutFunction);
   serverTimer = initialTime;
   updateTimer();
 }
 function updateTimer() {
   if(serverTimer > 0) {
     serverTimer = serverTimer - 1;
-    setTimeout(updateTimer, 1000);
+    timerSetTimeoutFunction = setTimeout(updateTimer, 1000);
+    io.emit('tickSecond', {timeCurrentValue: serverTimer});
   } else {
+    gameState.state = 'results';
     io.emit('serverTimerExpired');
     console.log('Timer expired!');
     console.log(getAnswersForAllCategories());
@@ -177,16 +189,16 @@ function updateTimer() {
 
 function getAnswersForAllCategories() {
   let answersForAllCategories = [];
-  for(let categoryIndex = 0; categoryIndex < gameRoundInfo.categories.length; categoryIndex++) {
+  for(let categoryIndex = 0; categoryIndex < gameState.roundInfo.categories.length; categoryIndex++) {
     let categoryAnswer = {
-      category: gameRoundInfo.categories[categoryIndex],
+      category: gameState.roundInfo.categories[categoryIndex],
       answers: []
     }
     answersForAllCategories.push(categoryAnswer);
     for(let clientIndex = 0; clientIndex < clients.length; clientIndex++) {
       if(clients[clientIndex].answers) {
         for(let i = 0; i < clients[clientIndex].answers.length; i++) {
-          if(clients[clientIndex].answers[i].question == gameRoundInfo.categories[categoryIndex]) {
+          if(clients[clientIndex].answers[i].question == gameState.roundInfo.categories[categoryIndex]) {
             let answer = {
               answerString: clients[clientIndex].answers[i].answerString,
               authorUsername: clients[clientIndex].username

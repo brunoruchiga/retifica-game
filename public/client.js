@@ -14,10 +14,12 @@ let usernameSelection = {
 };
 
 let startButton;
+let restartButton;
 
 let activeUsernamesListContainer;
 
 let gameRoundContainer;
+let resultsContainer;
 let randomLetterSlot;
 let timerSlot;
 let categoriesContainer;
@@ -43,6 +45,7 @@ function setup() {
   socket.on('usernameChanged', handleUsernameChanged);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('gameStarted', handleNewGame);
+  socket.on('tickSecond', handleTickSecond);
   socket.on('serverTimerExpired', handleGameRoundEnded);
   socket.on('presentAllAnswers', presentAllAnswers);
   socket.on('chatMessageSent', handleChatMessageReceived);
@@ -60,10 +63,12 @@ function setup() {
   handleEnterKey(usernameSelection.textInput, requestToJoinGame);
 
   startButton = select('#start-button').mousePressed(startGame);
+  restartButton = select('#restart-button').mousePressed(startGame);
 
   activeUsernamesListContainer = select('#usernames-list');
 
   gameRoundContainer = select('#game-round-container');
+  resultsContainer = select('#results-container');
   randomLetterSlot = select('#random-letter');
   timerSlot = select('#timer');
   categoriesContainer = select('#categories-container');
@@ -129,8 +134,14 @@ function validateUsername() {
   usernameSelection.textInput.value(filteredUsername);
 }
 
-function handleUserJoinedGame() {
-  changeScreenStateTo('LOBBY');
+function handleUserJoinedGame(data) {
+  if(data.state == 'waiting') {
+    changeScreenStateTo('LOBBY');
+  } else if (data.state == 'playing') {
+    handleNewGame(data.roundInfo);
+  } else if (data.state == 'results') {
+    changeScreenStateTo('RESULTS');
+  }
 }
 
 function handleEnterKey(textInput, f) {
@@ -150,6 +161,7 @@ function handleActiveUsersListUpdated(data) {
 }
 
 function changeScreenStateTo(newState) {
+  console.log(newState)
   if(newState == 'START_SCREEN') {
     usernameSelection.textInput.value(username);
     changeVisibility(containerLogin, true);
@@ -157,15 +169,29 @@ function changeScreenStateTo(newState) {
   }
   if(newState == 'LOBBY') {
     changeVisibility(startButton, true);
+    changeVisibility(restartButton, false);
     changeVisibility(gameRoundContainer, false);
     changeVisibility(containerLogin, false);
     changeVisibility(containerBody, true);
+    changeVisibility(resultsContainer, false);
   }
   if(newState == 'GAME_PLAYING') {
     changeVisibility(startButton, false);
+    changeVisibility(restartButton, false);
     changeVisibility(gameRoundContainer, true);
+    changeVisibility(categoriesContainer, true);
     changeVisibility(containerLogin, false);
     changeVisibility(containerBody, true);
+    changeVisibility(resultsContainer, false);
+  }
+  if(newState == 'RESULTS') {
+    changeVisibility(startButton, false);
+    changeVisibility(restartButton, true);
+    changeVisibility(gameRoundContainer, false);
+    changeVisibility(categoriesContainer, false);
+    changeVisibility(containerLogin, false);
+    changeVisibility(containerBody, true);
+    changeVisibility(resultsContainer, true);
   }
 }
 
@@ -193,18 +219,22 @@ function handleNewGame(data) {
 
 function initializeTimer(initialTime) {
   timer = initialTime;
-  updateTimer();
+  //updateTimer();
 }
-function updateTimer() {
-  if(timer > 0) {
-    timerSlot.html(timer);
-    timer = timer - 1;
-    setTimeout(updateTimer, 1000);
-  } else {
-    timerSlot.html('_');
-    console.log('Timer expired!');
-  }
+function handleTickSecond(data) {
+  timer = data.timeCurrentValue;
+  timerSlot.html(timer);
 }
+// function updateTimer() {
+//   if(timer > 0) {
+//     timerSlot.html(timer);
+//     timer = timer - 1;
+//     setTimeout(updateTimer, 1000);
+//   } else {
+//     timerSlot.html('_');
+//     console.log('Timer expired!');
+//   }
+// }
 
 function confirmCategory() {
   let answer = createAnswer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
@@ -217,7 +247,7 @@ function confirmCategory() {
     //Finished
     currentCategory.html('');
     categoryTextInput.value('');
-    window.alert("Respostas enviadas!");
+    changeVisibility(categoriesContainer, false);
   }
 }
 
@@ -236,9 +266,16 @@ function handleDisconnection(data) {
 }
 
 function handleGameRoundEnded(data) {
-  window.alert("Acabou o tempo!");
+  timerSlot.html('_');
+  changeScreenStateTo('RESULTS');
 }
 
 function presentAllAnswers(data) {
   console.log(data);
+  for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
+    createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
+    for(let i = 0; i < data[tempCategoryIndex].answers.length; i++) {
+      createP(data[tempCategoryIndex].answers[i].answerString).parent(resultsContainer);
+    }
+  }
 }

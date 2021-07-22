@@ -249,26 +249,31 @@
         color:#ddd;
         font-family: Tahoma, sans-serif;
       }
-      #main-container {
-      }
-      .container {
-        border:2px solid #ccc;
-        font-size:1em;
-        padding:0 1em;
-        margin:1em 0;
-        max-width:450px;
-        min-height:2em;
-      }
       h1 {
         font-family: Tahoma, sans-serif;
         font-weight: bold;
       }
-      .hidden {
-        display: none;
+      .container {
+        border:2px solid #ccc;
+        padding:0 1em;
+        margin:1em 0;
+        min-height:2em;
+      }
+      #main-container {
+        max-width: 600px;
+      }
+      #game-round-container {
+        font-size:125%;
+      }
+      .result-category {
+        font-weight: bold;
       }
       #messages-container {
         max-height:400px;
         overflow: auto;
+      }
+      .hidden {
+        display: none;
       }
     </style>
 
@@ -276,7 +281,7 @@
 
   <body>
     <div id='main-container' class='hidden w3-container'>
-      <h1 style="font-size: 10vw;">[RETIFICADO]</h1>
+      <h1 style="font-size: 8vw;">[RETIFICADO]</h1>
       <div id='container-login' class='w3-panel'>
         <!-- <p>Escolha seu nome de usuário:</p> -->
         <input type='text' id='username-input' class='w3-input w3-black' maxlength='20' autofocus/>
@@ -284,25 +289,24 @@
       </div>
       <div id='container-body' class='w3-panel'>
         <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar!</button>
-        <div id='game-round-container' class='container'>
-          <h2 id='random-letter'>_</h2>
+        <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Reiniciar</button>
+        <div id='game-round-container'>
+          <h2>Letra: <span id='random-letter'>_<span/></h2>
           <h2 id='timer'>_</h2>
-          <div id='categories-container' class='container'>
-            <p id='current-category'></p>
-            <input type='text' id='category-input' class='w3-input w3-black' maxlength='240'/>
+          <div id='categories-container'>
+            <h1 id='current-category'></h1>
+            <input type='text' id='category-input' class='w3-input w3-black w3-xxlarge' maxlength='240' autocomplete="off"/>
             <button id='confirm-category' class='w3-btn w3-black'>Confirmar</button>
           </div>
         </div>
+        <div id='results-container' class='container'></div>
         <div id='usernames-list-container' class='container'>
           <p><strong>Usuários conectados:</strong></p>
           <div id='usernames-list'></div>
         </div>
-
-        <hr>
-
         <div id='chat-container' class='container'>
           <p><strong>Chat:</strong></p>
-          <input type='text' id='chat-message-input' class='w3-input w3-black' maxlength='240'/>
+          <input type='text' id='chat-message-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
           <button id='send-message-button' class='w3-btn w3-black'>Enviar</button>
           <div id='messages-container' class='container'></div>
         </div>
