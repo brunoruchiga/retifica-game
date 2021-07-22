@@ -8,9 +8,15 @@
 - Quando a rodada é encerrada, usuários enviam automaticamente
 respostas preenchidas
 - Servidor recebe respostas e organiza para exibição
+- Quando a rodada é encerrada, respostas são exibidas
+- Jogo pode ser reiniciado
 
 --x--
 
-- Quando a rodada é encerrada, respostas são exibidas
-- Jogo pode ser reiniciado
+- Salas
 - Timer leva em consideração horário inicial
+- Animações
+- Outros jogadores podem avaliar respostas
+- Servidor sabe quando todos já terminaram
+- Tempo pode ser personalizado, ou infinito
+-

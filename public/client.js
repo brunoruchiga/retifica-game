@@ -8,10 +8,11 @@ let containerLogin;
 let containerBody;
 
 let username;
-let usernameSelection = {
-  textInput: undefined,
+let joinData = {
+  roomTextInput: undefined,
+  usernameTextInput: undefined,
   confirmButton: undefined
-};
+}
 
 let startButton, restartButton;
 
@@ -45,6 +46,7 @@ function setup() {
 
   initializeHtmlElements();
   initializeRandomUsername();
+  initializeRoom();
 
   currentCategoryIndex = 0;
   categoriesList = [];
@@ -58,9 +60,13 @@ function initializeHtmlElements() {
   containerLogin = select('#container-login');
   containerBody = select('#container-body');
 
-  usernameSelection.textInput = select('#username-input').input(validateUsernameOnInput);
-  usernameConfirmButton = select('#join-button').mousePressed(requestToJoinRoom);
-  handleEnterKey(usernameSelection.textInput, requestToJoinRoom);
+  joinData.roomTextInput = select('#room-input').input(validateRoomOnInput);
+  joinData.usernameTextInput = select('#username-input').input(validateUsernameOnInput);
+  joinData.confirmButton = select('#join-button').mousePressed(requestToJoinRoom);
+  handleEnterKey(joinData.roomTextInput, ()=>{
+    joinData.usernameTextInput.elt.focus();
+  });
+  handleEnterKey(joinData.usernameTextInput, requestToJoinRoom);
 
   startButton = select('#start-button').mousePressed(startGame);
   restartButton = select('#restart-button').mousePressed(startGame);
@@ -87,26 +93,46 @@ function initializeHtmlElements() {
   warningMessageSlot = select('#warning-message');
 }
 
+function initializeRoom() {
+  let initialRoomName;
+  if(location.hash != '') {
+    initialRoomName = location.hash.substring(1);
+  } else {
+    initialRoomName = 'room' + nf(floor(random(0,10000)),4,0);
+  }
+  joinData.roomTextInput.value(initialRoomName);
+}
+
+function validateRoomOnInput() {
+  let filteredRoom = joinData.roomTextInput.value().replace(/[^a-zA-Z0-9_]/ig, '');
+  joinData.roomTextInput.value(filteredRoom);
+}
+
 function initializeRandomUsername() {
   username = 'user' + nf(floor(random(0,1000000)),6,0);
-  usernameSelection.textInput.value(username);
+  joinData.usernameTextInput.value(username);
 }
 
 function validateUsernameOnInput() {
-  let filteredUsername = usernameSelection.textInput.value().replace(/[^a-zÀ-ÿ0-9_. ]/ig, '');
-  usernameSelection.textInput.value(filteredUsername);
+  let filteredUsername = joinData.usernameTextInput.value().replace(/[^a-zÀ-ÿ0-9_. ]/ig, '');
+  joinData.usernameTextInput.value(filteredUsername);
 }
 
 function requestToJoinRoom() {
-  if(usernameSelection.textInput.value() == '') {
+  if(joinData.roomTextInput.value() == '') {
+    return;
+  }
+  let roomName = joinData.roomTextInput.value().toLowerCase();
+  if(joinData.usernameTextInput.value() == '') {
     return;
   }
   setupSocket();
-  socket.emit('requestToJoinRoom', usernameSelection.textInput.value());
+
 }
 
 function setupSocket() {
   socket = io.connect(HOST);
+  console.log('Requesting connection to server...');
   socket.on('newSocketConnection', handleNewSocketConnection);
   socket.on('userJoinedGame', handleUserJoinedGame);
   socket.on('usernameConfirmed', handleUsernameConfirmed);
@@ -114,13 +140,24 @@ function setupSocket() {
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('tickSecond', handleTickSecond);
   socket.on('serverTimerExpired', handleGameRoundEnded);
-  socket.on('presentAllAnswers', presentAllAnswers);
   socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
 }
 
 function handleNewSocketConnection(data) {
   console.log('Connected to server');
+  if(joinData.roomTextInput.value() == '') {
+    return;
+  }
+  let roomName = joinData.roomTextInput.value().toLowerCase();
+  if(joinData.usernameTextInput.value() == '') {
+    return;
+  }
+  let joinRoomData = {
+    room: roomName,
+    username: joinData.usernameTextInput.value()
+  }
+  socket.emit('requestToJoinRoom', joinRoomData);
 }
 
 function handleUsernameConfirmed(data) {
@@ -129,7 +166,7 @@ function handleUsernameConfirmed(data) {
 }
 
 function handleUserJoinedGame(data) {
-  let gameState = data;
+  let gameState = data.gameState;
   if(gameState.state == 'waiting') {
     changeScreenStateTo('LOBBY');
   }
@@ -139,6 +176,8 @@ function handleUserJoinedGame(data) {
   if (gameState.state == 'results') {
     changeScreenStateTo('RESULTS');
   }
+  console.log('User joined room ' + data.room);
+  history.pushState(null, null, '#'+data.room);
 }
 
 function handleActiveUsersListUpdated(data) {
@@ -214,7 +253,7 @@ function confirmCategory() {
 }
 
 function handleGameRoundEnded(data) {
-  timerSlot.html('_');
+  presentAllAnswers(data);
   changeScreenStateTo('RESULTS');
 }
 
@@ -276,8 +315,7 @@ function changeScreenStateTo(newState) {
   console.log('Screen changed to: ' + newState);
 
   if(newState == 'START_SCREEN') {
-    usernameSelection.textInput.value(username);
-    console.log([containerLogin])
+    joinData.usernameTextInput.value(username);
     activateOnlyActiveElements([containerLogin]);
   }
   if(newState == 'LOBBY') {
