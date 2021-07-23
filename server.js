@@ -125,7 +125,7 @@ function Room(room) {
 
     let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
-    let totalTime = 10;
+    let totalTime = 60;
     let activeCategoriesThisRound = this.getCategoriesForThisRound(5);
 
     this.gameState.roundInfo = {
