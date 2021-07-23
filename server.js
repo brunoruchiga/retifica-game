@@ -32,10 +32,18 @@ function handleConnection(socket) {
     socket.join(data.room);
     rooms[data.room].handleRequestToJoinRoomByUsername(data.username, socket);
 
-    socket.to(data.room).on('requestNewGame', ()=>{rooms[data.room].startNewGame();});
-    socket.to(data.room).on('sendAnswer', ()=>{rooms[data.room].handleAnswerSent();});
-    socket.to(data.room).on('chatMessageSent', ()=>{rooms[data.room].handleChatMessage();});
-    socket.to(data.room).on('disconnect', (reason)=>{rooms[data.room].handleDisconnection(reason, socket)});
+    socket.to(data.room).on('requestNewGame', ()=>{
+      rooms[data.room].startNewGame();
+    });
+    socket.to(data.room).on('sendAnswer', (d)=>{
+      rooms[data.room].handleAnswerSent(d, socket);
+    });
+    socket.to(data.room).on('chatMessageSent', (d)=>{
+      rooms[data.room].handleChatMessage(d, socket);
+    });
+    socket.to(data.room).on('disconnect', (reason)=>{
+      rooms[data.room].handleDisconnection(reason, socket);
+    });
 
     io.to(socket.id).emit('userJoinedGame', {
       room: data.room,
@@ -200,7 +208,7 @@ function Room(room) {
         }
       }
     }
-    io.emit('activeUsersListUpdated', this.getListOfActiveUsernames());
+    io.to(this.room).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
   }
 
   this.handleAnswerSent = function(data) {
@@ -223,9 +231,9 @@ function Room(room) {
     return undefined;
   }
 
-  this.handleChatMessage = function(data) {
+  this.handleChatMessage = function(data, socket) {
     let message = this.getUser(socket.id).username + ': ' + data;
-    io.emit('chatMessageSent', message);
+    io.to(this.room).emit('chatMessageSent', message);
     //io.sockets.emit('message', data);
     console.log('Chat message sent:', socket.id, message);
   }
