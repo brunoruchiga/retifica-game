@@ -245,7 +245,7 @@
     </style>
     <style>
       body {
-        background-color: #111;
+        background-color: #161616;
         color:#ddd;
         font-family: Tahoma, sans-serif;
       }
@@ -255,7 +255,7 @@
       }
       .container {
         border:2px solid #ccc;
-        padding:0 1em;
+        padding:0 1em 1em 1em;
         margin:1em 0;
         min-height:2em;
       }
@@ -329,12 +329,21 @@
           <button id='send-message-button' class='w3-btn w3-black'>Enviar</button>
           <div id='messages-container' class='container'></div>
         </div>
+        <div id='suggestions-container' class='container w3-small'>
+          <p><strong>Escreva sua sugestão de frase para o jogo:</strong></p>
+          <input type='text' id='suggestion-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
+          <button id='confirm-suggestion' class='w3-btn w3-black'>Enviar sugestão</button>
+          <div id='confirmed-suggestion' class='w3-panel w3-green hidden'><p>Enviado!</p></div>
+        </div>
       </div>
 
       <div id='footer' class='w3-container w3-tiny'>
         <p>Criado por <a href='http://brunoruchiga.com/'>Bruno Ruchiga</a></p>
-        <p>Algumas das frases baseadas no jogo Cards Against Humanity, sob a licença Creative Commons BY-NC-SA 2.0.</p>
-        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.
+        <p>
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.
+          <br>Algumas das frases baseadas no jogo Cards Against Humanity, sob a licença Creative Commons BY-NC-SA 2.0.
+          <br>As respostas enviadas ao jogo são armazenadas apenas anonimamente.
+        </p>
       </div>
     </div>
   </body>

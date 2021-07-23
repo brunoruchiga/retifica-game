@@ -38,6 +38,13 @@ let chat = {
   messagesContainer: undefined
 };
 
+let suggestions = {
+  container: undefined,
+  textInput: undefined,
+  confirmButton: undefined,
+  feedbackMessage: undefined
+}
+
 let warningContainer;
 let warningMessageSlot;
 
@@ -88,6 +95,12 @@ function initializeHtmlElements() {
   chat.sendButton = select('#send-message-button').mousePressed(handleSendMessageButtonClicked);
   handleEnterKey(chat.messageInput, handleSendMessageButtonClicked);
   chat.messagesContainer = select('#messages-container');
+
+  suggestions.container = select('#suggestions-container');
+  suggestions.textInput = select('#suggestion-input');
+  suggestions.confirmButton = select('#confirm-suggestion').mousePressed(sendSuggestion);
+  handleEnterKey(suggestions.textInput, sendSuggestion);
+  suggestions.feedbackMessage = select('#confirmed-suggestion');
 
   warningContainer = select('#warnings').addClass('hidden');
   warningMessageSlot = select('#warning-message');
@@ -283,6 +296,20 @@ function handleChatMessageReceived(data) {
   console.log("Received:" + data);
   createP(data).parent(chat.messagesContainer);
   chat.messagesContainer.elt.scrollTo(0,9999999999);
+}
+
+function sendSuggestion() {
+  if(suggestions.textInput.value() == '') {
+    return;
+  }
+  let data = suggestions.textInput.value();
+  console.log("Suggestion:" + data);
+  socket.emit('suggestionSent', data);
+  suggestions.textInput.value('');
+  changeVisibility(suggestions.feedbackMessage, true);
+  setTimeout(()=>{
+    changeVisibility(suggestions.feedbackMessage, false);
+  }, 1000);
 }
 
 function handleDisconnection(data) {

@@ -14,6 +14,8 @@ let io = socket(server, {
 });
 io.sockets.on('connection', handleConnection);
 
+const fs = require("fs");
+
 let globalClients = [];
 let rooms = {};
 
@@ -24,6 +26,7 @@ function handleConnection(socket) {
   globalClients.push(new Client(socket));
 
   socket.on('requestToJoinRoom', joinNewUserToRoom);
+  socket.on('suggestionSent', addSuggestion);
 
   function joinNewUserToRoom(data) {
     if(!rooms[data.room]) {
@@ -154,7 +157,6 @@ function Room(room) {
       this.gameState.state = 'results';
       io.to(this.room).emit('serverTimerExpired', this.getAnswersForAllCategories());
       console.log('Timer expired!');
-      console.log(this.getAnswersForAllCategories());
     }
   }
 
@@ -187,6 +189,7 @@ function Room(room) {
         }
       }
     }
+    archiveAnswers(answersForAllCategories);
     return answersForAllCategories;
   }
 
@@ -234,7 +237,8 @@ function Room(room) {
   }
 
   this.handleChatMessage = function(data, socket) {
-    let message = this.getUser(socket.id).username + ': ' + data;
+    let filteredMessage = data.replace(/\<.*?\>/, '');
+    let message = this.getUser(socket.id).username + ': ' + '<strong>' + filteredMessage + '</strong>';
     io.to(this.room).emit('chatMessageSent', message);
     //io.sockets.emit('message', data);
     console.log('Chat message sent:', socket.id, message);
@@ -295,4 +299,51 @@ function shuffle(array) {
     randomizedArray.push(randomElement);
   }
   return randomizedArray;
+}
+
+let isEdittingArchiveAnswersFile = false;
+function archiveAnswers(newAnswers) {
+  if(isEdittingArchiveAnswersFile) {
+    //Is file is being written, try again 1s after and abort this function
+    setTimeout(()=>{archiveAnswers(newAnswers)}, 100);
+    return;
+  }
+  isEdittingArchiveAnswersFile = true;
+  fs.readFile("public/other/globalAnswersArchive.json", function(err, buf) {
+    let parsedData = JSON.parse(buf);
+    for(let tempCategoryIndex = 0; tempCategoryIndex < newAnswers.length; tempCategoryIndex++) {
+      for(let i = 0; i < newAnswers[tempCategoryIndex].answers.length; i++) {
+        if(!parsedData[newAnswers[tempCategoryIndex].category]) {
+          parsedData[newAnswers[tempCategoryIndex].category] = [];
+        }
+        parsedData[newAnswers[tempCategoryIndex].category].push(newAnswers[tempCategoryIndex].answers[i].answerString);
+      }
+    }
+    let jsonData = JSON.stringify(parsedData);
+    fs.writeFile("public/other/globalAnswersArchive.json", jsonData, (err) => {
+      if (err) console.log(err);
+      console.log("Answers archived");
+      isEdittingArchiveAnswersFile = false;
+    });
+  });
+}
+
+let isEdittingSuggestionFile = false;
+function addSuggestion(text) {
+  if(isEdittingSuggestionFile) {
+    //Is file is being written, try again 1s after and abort this function
+    setTimeout(()=>{addSuggestion(text)}, 100);
+    return;
+  }
+  isEdittingSuggestionFile = true;
+  console.log('[Sugestão]' + text + '[Fim da Sugestão]')
+  fs.readFile("public/other/sugestoes.txt", function(err, buf) {
+    let prevText = buf.toString();
+    let newText = prevText + '\n' + text;
+    fs.writeFile("public/other/sugestoes.txt", newText, (err) => {
+      if (err) console.log(err);
+      console.log("Arquivo salvo");
+      isEdittingSuggestionFile = false;
+    });
+  });
 }
