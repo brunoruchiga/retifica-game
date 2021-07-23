@@ -10,13 +10,16 @@ respostas preenchidas
 - Servidor recebe respostas e organiza para exibição
 - Quando a rodada é encerrada, respostas são exibidas
 - Jogo pode ser reiniciado
+- Salas
+- Fazer lista de perguntas
 
 --x--
 
-- Salas
+- Visual
+- Mostrar campo para completar no meio da frase
 - Timer leva em consideração horário inicial
 - Animações
 - Outros jogadores podem avaliar respostas
 - Servidor sabe quando todos já terminaram
 - Tempo pode ser personalizado, ou infinito
--
+- Fazer mais perguntas pra lista
