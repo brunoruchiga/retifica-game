@@ -211,7 +211,7 @@ function Room(room) {
     io.to(this.room).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
   }
 
-  this.handleAnswerSent = function(data) {
+  this.handleAnswerSent = function(data, socket) {
     let user = this.getUser(socket.id);
     if(user) {
       if(user.answers) {
