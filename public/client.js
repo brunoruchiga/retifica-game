@@ -263,8 +263,9 @@ function presentAllAnswers(data) {
   for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
     createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
     for(let i = 0; i < data[tempCategoryIndex].answers.length; i++) {
-      createP(data[tempCategoryIndex].answers[i].answerString).parent(resultsContainer);
+      createP(data[tempCategoryIndex].answers[i].answerString).addClass('result-answer').parent(resultsContainer);
     }
+    createElement('hr').parent(resultsContainer);;
   }
 }
 
