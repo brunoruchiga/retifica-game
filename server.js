@@ -353,7 +353,8 @@ function addSuggestion(text) {
   });
 }
 
-uploadFile('Teste...', 'Testando upload', 'txt');
+// uploadFile('Teste...', 'Testando upload', 'txt');
+/*
 function uploadFile(file, fileName, fileType){
   const s3 = new aws.S3();
   const s3Params = {
@@ -388,3 +389,4 @@ function uploadFile(file, fileName, fileType){
     console.log('File uploaded')
   });
 };
+*/
