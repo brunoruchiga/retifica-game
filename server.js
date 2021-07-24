@@ -16,10 +16,10 @@ let io = socket(server, {
 });
 io.sockets.on('connection', handleConnection);
 
+const https = require('https');
 const fs = require('fs');
 const aws = require('aws-sdk');
 aws.config.region = 'us-east-2';
-const S3_BUCKET = process.env.S3_BUCKET_NAME;
 
 let globalClients = [];
 let rooms = {};
@@ -342,15 +342,79 @@ function addSuggestion(text) {
   }
   isEdittingSuggestionFile = true;
   console.log('[Sugestão]' + text + '[Fim da Sugestão]')
-  fs.readFile("public/other/sugestoes.txt", function(err, buf) {
-    let prevText = buf.toString();
-    let newText = prevText + '\n' + text;
-    fs.writeFile("public/other/sugestoes.txt", newText, (err) => {
-      if (err) console.log(err);
-      console.log("Arquivo salvo");
-      isEdittingSuggestionFile = false;
-    });
+  const file = fs.createWriteStream("public/other/sugestoes.txt");
+  https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/sugestoes.txt", response => {
+    console.log(response);
+    response.on('data', function(d) {
+      let prevText;
+      if(response.statusCode == 403) {
+        prevText = '';
+      } else {
+        prevText = d.toString();
+      }
+      let newText = prevText + '\n' + text;
+      fs.writeFile("public/other/sugestoes.txt", newText, (err) => {
+        if (err) console.log(err);
+        console.log("Arquivo salvo em Heroku");
+        uploadFile('public/other/sugestoes.txt', 'sugestoes.txt', function(data) {
+          console.log("Arquivo salvo em S3");
+          isEdittingSuggestionFile = false;
+        })
+      })
+    })
+  })
+};
+
+function uploadFile(file, name, callback) {
+  const fileStream = fs.createReadStream(file);
+  const s3 = new aws.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   });
+  const s3Params = {
+    Bucket: 'cards-against-ruchiga', //process.env.S3_BUCKET_NAME,
+    Key: name,
+    Body: fileStream,
+    Expires: 600,
+    ACL: 'public-read'
+  };
+  s3.upload(s3Params, function(err, data) {
+    if(err) {
+      console.error(err);
+      return;
+    }
+    console.log(data);
+    callback(data);
+  });
+  // s3.getSignedUrl('putObject', s3Params, (err, data) => {
+  //   if(err){
+  //     console.log(err);
+  //     return;
+  //   }
+  //   const signedRequest = data;
+  //   const url = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+  //
+  //   return s3.upload(s3Params, function(err, data) {
+  //     console.log(err, data);
+  //   })
+
+    // const xhr = new XMLHttpRequest();
+    // xhr.open('PUT', signedRequest);
+    // xhr.onreadystatechange = () => {
+    //   if(xhr.readyState === 4){
+    //     if(xhr.status === 200){
+    //       // document.getElementById('preview').src = url;
+    //       // document.getElementById('avatar-url').value = url;
+    //       console.log('File uploaded');
+    //     }
+    //     else{
+    //       console.log('Could not upload file');
+    //     }
+    //   }
+    // };
+    // xhr.send(file);
+  //   console.log('File uploaded')
+  // });
 }
 
 // uploadFile('Teste...', 'Testando upload', 'txt');
