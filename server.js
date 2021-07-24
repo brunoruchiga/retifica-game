@@ -314,24 +314,31 @@ function archiveAnswers(newAnswers) {
     return;
   }
   isEdittingArchiveAnswersFile = true;
-  fs.readFile("public/other/globalAnswersArchive.json", function(err, buf) {
-    let parsedData = JSON.parse(buf);
-    for(let tempCategoryIndex = 0; tempCategoryIndex < newAnswers.length; tempCategoryIndex++) {
-      for(let i = 0; i < newAnswers[tempCategoryIndex].answers.length; i++) {
-        if(!parsedData[newAnswers[tempCategoryIndex].category]) {
-          parsedData[newAnswers[tempCategoryIndex].category] = [];
+  // fs.readFile("public/other/globalAnswersArchive.json", function(err, buf) {
+  const file = fs.createWriteStream("public/other/globalAnswersArchive.json");
+  https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/globalAnswersArchive.json", response => {
+    response.on('data', function(d) {
+      let parsedData = JSON.parse(buf);
+      for(let tempCategoryIndex = 0; tempCategoryIndex < newAnswers.length; tempCategoryIndex++) {
+        for(let i = 0; i < newAnswers[tempCategoryIndex].answers.length; i++) {
+          if(!parsedData[newAnswers[tempCategoryIndex].category]) {
+            parsedData[newAnswers[tempCategoryIndex].category] = [];
+          }
+          parsedData[newAnswers[tempCategoryIndex].category].push(newAnswers[tempCategoryIndex].answers[i].answerString);
         }
-        parsedData[newAnswers[tempCategoryIndex].category].push(newAnswers[tempCategoryIndex].answers[i].answerString);
       }
-    }
-    let jsonData = JSON.stringify(parsedData);
-    fs.writeFile("public/other/globalAnswersArchive.json", jsonData, (err) => {
-      if (err) console.log(err);
-      console.log("Answers archived");
-      isEdittingArchiveAnswersFile = false;
+      let jsonData = JSON.stringify(parsedData);
+      fs.writeFile("public/other/globalAnswersArchive.json", jsonData, (err) => {
+        if (err) console.log(err);
+        console.log("Answers archived in Heroku");
+        uploadFile('public/other/globalAnswersArchive.json', 'globalAnswersArchive.json', function(data) {
+          console.log("Answers archived in S3");
+          isEdittingSuggestionFile = false;
+        });
+      });
     });
   });
-}
+};
 
 let isEdittingSuggestionFile = false;
 function addSuggestion(text) {
@@ -344,7 +351,6 @@ function addSuggestion(text) {
   console.log('[Sugestão]' + text + '[Fim da Sugestão]')
   const file = fs.createWriteStream("public/other/sugestoes.txt");
   https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/sugestoes.txt", response => {
-    console.log(response);
     response.on('data', function(d) {
       let prevText;
       if(response.statusCode == 403) {
@@ -355,9 +361,9 @@ function addSuggestion(text) {
       let newText = prevText + '\n' + text;
       fs.writeFile("public/other/sugestoes.txt", newText, (err) => {
         if (err) console.log(err);
-        console.log("Arquivo salvo em Heroku");
+        console.log("Suggestion saved in Heroku");
         uploadFile('public/other/sugestoes.txt', 'sugestoes.txt', function(data) {
-          console.log("Arquivo salvo em S3");
+          console.log("Suggestion saved in S3");
           isEdittingSuggestionFile = false;
         })
       })
@@ -386,71 +392,4 @@ function uploadFile(file, name, callback) {
     console.log(data);
     callback(data);
   });
-  // s3.getSignedUrl('putObject', s3Params, (err, data) => {
-  //   if(err){
-  //     console.log(err);
-  //     return;
-  //   }
-  //   const signedRequest = data;
-  //   const url = `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
-  //
-  //   return s3.upload(s3Params, function(err, data) {
-  //     console.log(err, data);
-  //   })
-
-    // const xhr = new XMLHttpRequest();
-    // xhr.open('PUT', signedRequest);
-    // xhr.onreadystatechange = () => {
-    //   if(xhr.readyState === 4){
-    //     if(xhr.status === 200){
-    //       // document.getElementById('preview').src = url;
-    //       // document.getElementById('avatar-url').value = url;
-    //       console.log('File uploaded');
-    //     }
-    //     else{
-    //       console.log('Could not upload file');
-    //     }
-    //   }
-    // };
-    // xhr.send(file);
-  //   console.log('File uploaded')
-  // });
 }
-
-// uploadFile('Teste...', 'Testando upload', 'txt');
-/*
-function uploadFile(file, fileName, fileType){
-  const s3 = new aws.S3();
-  const s3Params = {
-    Bucket: S3_BUCKET,
-    Key: fileName,
-    Expires: 600,
-    ContentType: fileType,
-    ACL: 'public-read'
-  };
-  s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    if(err){
-      console.log(err);
-      return;
-    }
-    const signedRequest = data;
-    const url = `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`;
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', signedRequest);
-    xhr.onreadystatechange = () => {
-      if(xhr.readyState === 4){
-        if(xhr.status === 200){
-          // document.getElementById('preview').src = url;
-          // document.getElementById('avatar-url').value = url;
-          console.log('File uploaded');
-        }
-        else{
-          console.log('Could not upload file');
-        }
-      }
-    };
-    xhr.send(file);
-    console.log('File uploaded')
-  });
-};
-*/
