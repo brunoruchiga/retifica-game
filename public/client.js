@@ -238,14 +238,15 @@ function updateTimer() {
 function initializeGame(data) {
   randomLetterSlot.html(data.randomLetter);
 
-  categoriesList = data.categories;
+  categoriesList = [];
+  for(let i = 0; i < data.categories.length; i++) {
+    categoriesList.push({
+      categoryString: data.categories[i],
+      confirmed: false,
+      indexOnServer: i
+    });
+  }
   updateCurrentCategoryDisplayed(0);
-
-  // categoriesContainer.html('');
-  // for(let i = 0; i < data.categories.length; i++) {
-  //   createP(data.categories[i]).parent(categoriesContainer);
-  //   createInput('').parent(categoriesContainer);
-  // }
 
   initializeTimer(data.totalTime);
 
@@ -255,7 +256,7 @@ function initializeGame(data) {
 function updateCurrentCategoryDisplayed(index) {
   currentCategoryIndex = index;
 
-  let sentenceSplited = String(categoriesList[currentCategoryIndex]).split('___');
+  let sentenceSplited = String(categoriesList[currentCategoryIndex].categoryString).split('___');
   if(sentenceSplited.length == 1) {
     sentenceSplited[0] = sentenceSplited[0] + '<br/>';
     categoryAnswerSlotInSentencePre.html(sentenceSplited[0]);
@@ -296,14 +297,21 @@ function updateAnswerOnInput() {
 
 function confirmCategory() {
   if(categoryTextInput.value() != '') {
-    let answer = new Answer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
+    let answer = new Answer(categoriesList[currentCategoryIndex].indexOnServer, categoriesList[currentCategoryIndex].categoryString, categoryTextInput.value());
+    categoriesList[currentCategoryIndex].confirmed = true;
     socket.emit('sendAnswer', answer);
-  } else {
-    categoriesList.push(categoriesList[currentCategoryIndex]);
   }
-  if(currentCategoryIndex+1 < categoriesList.length) {
-    updateCurrentCategoryDisplayed(currentCategoryIndex+1);
-  } else {
+  let allCategoriesConfirmed = true;
+  currentCategoryIndex = currentCategoryIndex + 1;
+  for(let offsetFromCurrentIndex = 0; offsetFromCurrentIndex < categoriesList.length; offsetFromCurrentIndex++) {
+    let tempIndex = (currentCategoryIndex + offsetFromCurrentIndex) % categoriesList.length;
+    if(!categoriesList[tempIndex].confirmed) {
+      allCategoriesConfirmed = false;
+      updateCurrentCategoryDisplayed(tempIndex);
+      break;
+    }
+  }
+  if(allCategoriesConfirmed) {
     //Finished
     clearCurrentCategoryDisplayed();
     categoryTextInput.value('');
