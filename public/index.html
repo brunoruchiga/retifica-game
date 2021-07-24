@@ -258,11 +258,12 @@
       .container {
         border:2px solid #ccc;
         padding:0 1em 1em 1em;
-        margin:1em 0;
+        margin:2em 0;
         min-height:2em;
       }
       #main-container {
         max-width: 600px;
+        padding: 0 0.5em;
       }
       #game-round-container {
         font-size:100%;
@@ -271,9 +272,15 @@
       #game-round-container p {
         margin:0.25em 0;
       }
+      #current-category {
+        padding:1em 0;
+      }
       .current-category-text {
         font-family: 'Zilla Slab', serif;
         font-size:150%;
+      }
+      #category-input {
+        font-weight: normal;
       }
       .result-category {
         color: #bbb;
@@ -282,8 +289,12 @@
         font-weight: bold;
       }
       #messages-container {
-        max-height:400px;
+        height:140px;
         overflow: auto;
+        padding:1em;
+      }
+      #messages-container p {
+        margin:0.25em 0;
       }
       .hidden {
         display: none;
@@ -295,7 +306,7 @@
   </head>
 
   <body>
-    <div id='main-container' class='hidden w3-container'>
+    <div id='main-container' class='hidden'>
 
       <div id='warnings' class='w3-panel w3-pale-yellow' style='cursor:pointer;' onclick="changeVisibility(warningContainer, false)" >
         <p id='warning-message'>...</p>
@@ -319,26 +330,25 @@
         <div id='game-round-container'>
           <p>[Letra: <span id='random-letter'>_</span>] [Tempo: <span id='timer'>_</span>]</p>
           <div id='categories-container'>
-            <p id='current-category' class='hidden'></p>
-            <p>
+            <p id='current-category'>
               <span id='answer-slot-in-sentence-pre' class='current-category-text'>Este é um teste de </span>
               <span id='answer-slot-in-sentence' class='w3-black current-category-text' style='padding-left:0.5em;padding-right:0.5em;'>slot no meio da frase</span>
               <span id='answer-slot-in-sentence-pos' class='current-category-text'> para ver como fica.</span>
             </p>
-            <input type='text' id='category-input' class='w3-input w3-black w3-xlarge' maxlength='240' autocomplete="off"/>
+            <input type='text' id='category-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
             <button id='confirm-category' class='w3-btn w3-black'>Retificado!</button>
           </div>
         </div>
         <div id='results-container' class='container'></div>
-        <div id='usernames-list-container' class='container'>
-          <p><strong>Usuários conectados:</strong></p>
-          <div id='usernames-list'></div>
+        <div id='usernames-list-container' class='container w3-small'>
+          <p style='margin-bottom:0;'><strong>Usuários conectados:</strong></p>
+          <ul id='usernames-list' class='w3-ul'></ul>
         </div>
         <div id='chat-container' class='container w3-small'>
           <p><strong>Chat:</strong></p>
+          <div id='messages-container' class='container'></div>
           <input type='text' id='chat-message-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
           <button id='send-message-button' class='w3-btn w3-black'>Enviar</button>
-          <div id='messages-container' class='container'></div>
         </div>
         <div id='suggestions-container' class='container w3-small'>
           <p><strong>Escreva sua sugestão de frase para o jogo:</strong></p>

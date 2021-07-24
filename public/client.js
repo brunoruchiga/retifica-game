@@ -6,6 +6,8 @@ let socket;
 let mainContainer;
 let containerLogin;
 let containerBody;
+let header;
+let footer;
 
 let username;
 let joinData = {
@@ -23,7 +25,6 @@ let resultsContainer;
 let randomLetterSlot;
 let timerSlot;
 let categoriesContainer;
-let currentCategory;
 let categoryAnswerSlotInSentence;
 let categoryAnswerSlotInSentencePre;
 let categoryAnswerSlotInSentencePos;
@@ -69,6 +70,8 @@ function initializeHtmlElements() {
   mainContainer = select('#main-container');
   containerLogin = select('#container-login');
   containerBody = select('#container-body');
+  header = select('#header');
+  footer = select('#footer');
 
   joinData.roomTextInput = select('#room-input').input(validateRoomOnInput);
   joinData.usernameTextInput = select('#username-input').input(validateUsernameOnInput);
@@ -88,7 +91,6 @@ function initializeHtmlElements() {
   randomLetterSlot = select('#random-letter');
   timerSlot = select('#timer');
   categoriesContainer = select('#categories-container');
-  currentCategory = select('#current-category');
   categoryAnswerSlotInSentence = select('#answer-slot-in-sentence');
   categoryAnswerSlotInSentencePre = select('#answer-slot-in-sentence-pre');
   categoryAnswerSlotInSentencePos = select('#answer-slot-in-sentence-pos');
@@ -202,7 +204,7 @@ function handleUserJoinedGame(data) {
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
   for(let i = 0; i < data.length; i++) {
-    createP(data[i]).parent(activeUsernamesListContainer);
+    createElement('li', data[i]).class('w3-padding-small').parent(activeUsernamesListContainer);
   }
 }
 
@@ -250,7 +252,6 @@ function initializeGame(data) {
 
 function updateCurrentCategoryDisplayed(index) {
   currentCategoryIndex = index;
-  currentCategory.html(categoriesList[currentCategoryIndex]);
 
   let sentenceSplited = String(categoriesList[currentCategoryIndex]).split('___');
   if(sentenceSplited.length == 1) {
@@ -268,6 +269,12 @@ function updateCurrentCategoryDisplayed(index) {
   categoryAnswerSlotInSentence.html('_____');
   categoryTextInput.value('');
 }
+function clearCurrentCategoryDisplayed() {
+  currentCategoryIndex = 0;
+  categoryAnswerSlotInSentencePre.html('');
+  categoryAnswerSlotInSentencePos.html('');
+  categoryAnswerSlotInSentence.html('');
+}
 
 function Answer(questionIndex, question, answerString) {
   this.questionIndex = questionIndex;
@@ -276,7 +283,13 @@ function Answer(questionIndex, question, answerString) {
 }
 
 function updateAnswerOnInput() {
-  categoryAnswerSlotInSentence.html(categoryTextInput.value());
+  let answer = categoryTextInput.value();
+
+  if(answer == '') {
+    categoryAnswerSlotInSentence.html('_____');
+  } else {
+    categoryAnswerSlotInSentence.html(categoryTextInput.value());
+  }
 }
 
 function confirmCategory() {
@@ -288,7 +301,7 @@ function confirmCategory() {
     updateCurrentCategoryDisplayed(currentCategoryIndex+1);
   } else {
     //Finished
-    currentCategory.html('');
+    clearCurrentCategoryDisplayed();
     categoryTextInput.value('');
     changeVisibility(categoriesContainer, false);
   }
@@ -360,13 +373,17 @@ function displayWarning(warningMessage) {
 //Screen states
 function getAllElements() {
   return [
+    header,
+    footer,
     containerLogin,
     containerBody,
     startButton,
     restartButton,
     gameRoundContainer,
     categoriesContainer,
-    resultsContainer
+    resultsContainer,
+    chat.container,
+    suggestions.container
   ];
 }
 
@@ -375,16 +392,16 @@ function changeScreenStateTo(newState) {
 
   if(newState == 'START_SCREEN') {
     joinData.usernameTextInput.value(username);
-    activateOnlyActiveElements([containerLogin]);
+    activateOnlyActiveElements([header, footer, containerLogin]);
   }
   if(newState == 'LOBBY') {
-    activateOnlyActiveElements([containerBody, startButton]);
+    activateOnlyActiveElements([header, footer, containerBody, startButton, chat.container, suggestions.container]);
   }
   if(newState == 'GAME_PLAYING') {
     activateOnlyActiveElements([gameRoundContainer, categoriesContainer, containerBody]);
   }
   if(newState == 'RESULTS') {
-    activateOnlyActiveElements([containerBody, restartButton, resultsContainer]);
+    activateOnlyActiveElements([header, footer, containerBody, restartButton, resultsContainer, chat.container, suggestions.container]);
   }
 }
 
