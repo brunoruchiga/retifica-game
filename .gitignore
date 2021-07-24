@@ -12,3 +12,4 @@ Dockerfile
 docker-compose.yml
 public/other/globalAnswersArchive.json
 public/other/sugestoes.txt
+public/other/globalAnswersArchive.json
