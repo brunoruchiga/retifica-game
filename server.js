@@ -16,7 +16,10 @@ let io = socket(server, {
 });
 io.sockets.on('connection', handleConnection);
 
-const fs = require("fs");
+const fs = require('fs');
+const aws = require('aws-sdk');
+aws.config.region = 'us-east-2';
+const S3_BUCKET = process.env.S3_BUCKET_NAME;
 
 let globalClients = [];
 let rooms = {};
@@ -349,3 +352,39 @@ function addSuggestion(text) {
     });
   });
 }
+
+uploadFile('Teste...', 'Testando upload', 'txt');
+function uploadFile(file, fileName, fileType){
+  const s3 = new aws.S3();
+  const s3Params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 600,
+    ContentType: fileType,
+    ACL: 'public-read'
+  };
+  s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    if(err){
+      console.log(err);
+      return;
+    }
+    const signedRequest = data;
+    const url = `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`;
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', signedRequest);
+    xhr.onreadystatechange = () => {
+      if(xhr.readyState === 4){
+        if(xhr.status === 200){
+          // document.getElementById('preview').src = url;
+          // document.getElementById('avatar-url').value = url;
+          console.log('File uploaded');
+        }
+        else{
+          console.log('Could not upload file');
+        }
+      }
+    };
+    xhr.send(file);
+    console.log('File uploaded')
+  });
+};
