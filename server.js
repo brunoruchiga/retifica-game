@@ -6,7 +6,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT);
 
-app.use(express.static('public'));
+app.use(express.static('public',{
+  extensions:['json']
+}));
 
 let socket = require('socket.io');
 let io = socket(server, {
