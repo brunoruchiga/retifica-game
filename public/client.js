@@ -251,8 +251,10 @@ function Answer(questionIndex, question, answerString) {
 }
 
 function confirmCategory() {
-  let answer = new Answer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
-  socket.emit('sendAnswer', answer);
+  if(categoryTextInput.value() != '') {
+    let answer = new Answer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
+    socket.emit('sendAnswer', answer);
+  }
   if(currentCategoryIndex + 1 < categoriesList.length) {
     currentCategoryIndex++;
     currentCategory.html(categoriesList[currentCategoryIndex]);

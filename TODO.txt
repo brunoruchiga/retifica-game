@@ -12,14 +12,15 @@ respostas preenchidas
 - Jogo pode ser reiniciado
 - Salas
 - Fazer lista de perguntas
+- Jogador pode enviar sugestões
 
 --x--
 
 - Visual
-- Mostrar campo para completar no meio da frase
-- Timer leva em consideração horário inicial
 - Animações
 - Outros jogadores podem avaliar respostas
 - Servidor sabe quando todos já terminaram
+- Mostrar campo para completar no meio da frase
+- Timer leva em consideração horário inicial
 - Tempo pode ser personalizado, ou infinito
 - Fazer mais perguntas pra lista
