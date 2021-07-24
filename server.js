@@ -339,7 +339,7 @@ function archiveAnswers(newAnswers) {
   }
   isEdittingArchiveAnswersFile = true;
   // fs.readFile("public/other/globalAnswersArchive.json", function(err, buf) {
-  const file = fs.createWriteStream("public/other/globalAnswersArchive.json");
+  //const file = fs.createWriteStream("public/other/globalAnswersArchive.json");
   https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/globalAnswersArchive.json", response => {
     response.on('data', function(d) {
       let parsedData = JSON.parse(d.toString());
