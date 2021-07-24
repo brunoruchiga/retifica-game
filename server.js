@@ -318,7 +318,7 @@ function archiveAnswers(newAnswers) {
   const file = fs.createWriteStream("public/other/globalAnswersArchive.json");
   https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/globalAnswersArchive.json", response => {
     response.on('data', function(d) {
-      let parsedData = JSON.parse(buf);
+      let parsedData = JSON.parse(d.toString());
       for(let tempCategoryIndex = 0; tempCategoryIndex < newAnswers.length; tempCategoryIndex++) {
         for(let i = 0; i < newAnswers[tempCategoryIndex].answers.length; i++) {
           if(!parsedData[newAnswers[tempCategoryIndex].category]) {
