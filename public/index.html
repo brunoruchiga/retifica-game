@@ -313,7 +313,12 @@
         <div id='game-round-container'>
           <p>[Letra: <span id='random-letter'>_</span>] [Tempo: <span id='timer'>_</span>]</p>
           <div id='categories-container'>
-            <p id='current-category'></p>
+            <p id='current-category' class='hidden'></p>
+            <p>
+              <span id='answer-slot-in-sentence-pre'>Este é um teste de </span>
+              <span id='answer-slot-in-sentence' class='w3-black' style='padding-left:0.5em;padding-right:0.5em;'>slot no meio da frase</span>
+              <span id='answer-slot-in-sentence-pos'> para ver como fica.</span>
+            </p>
             <input type='text' id='category-input' class='w3-input w3-black w3-xlarge' maxlength='240' autocomplete="off"/>
             <button id='confirm-category' class='w3-btn w3-black'>Retificado!</button>
           </div>

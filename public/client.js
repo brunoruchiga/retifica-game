@@ -24,6 +24,9 @@ let randomLetterSlot;
 let timerSlot;
 let categoriesContainer;
 let currentCategory;
+let categoryAnswerSlotInSentence;
+let categoryAnswerSlotInSentencePre;
+let categoryAnswerSlotInSentencePos;
 let categoryTextInput;
 let confirmCategoryButton;
 let currentCategoryIndex;
@@ -86,7 +89,10 @@ function initializeHtmlElements() {
   timerSlot = select('#timer');
   categoriesContainer = select('#categories-container');
   currentCategory = select('#current-category');
-  categoryTextInput = select('#category-input');
+  categoryAnswerSlotInSentence = select('#answer-slot-in-sentence');
+  categoryAnswerSlotInSentencePre = select('#answer-slot-in-sentence-pre');
+  categoryAnswerSlotInSentencePos = select('#answer-slot-in-sentence-pos');
+  categoryTextInput = select('#category-input').input(updateAnswerOnInput);
   confirmCategoryButton = select('#confirm-category').mousePressed(confirmCategory);
   handleEnterKey(categoryTextInput, confirmCategory);
 
@@ -229,9 +235,7 @@ function initializeGame(data) {
   randomLetterSlot.html(data.randomLetter);
 
   categoriesList = data.categories;
-  currentCategoryIndex = 0;
-  currentCategory.html(categoriesList[currentCategoryIndex]);
-  categoryTextInput.value('');
+  updateCurrentCategoryDisplayed(0);
 
   // categoriesContainer.html('');
   // for(let i = 0; i < data.categories.length; i++) {
@@ -244,10 +248,35 @@ function initializeGame(data) {
   changeScreenStateTo('GAME_PLAYING');
 }
 
+function updateCurrentCategoryDisplayed(index) {
+  currentCategoryIndex = index;
+  currentCategory.html(categoriesList[currentCategoryIndex]);
+
+  let sentenceSplited = String(categoriesList[currentCategoryIndex]).split('___');
+  if(sentenceSplited.length == 1) {
+    sentenceSplited[0] = sentenceSplited[0] + '<br/>';
+    categoryAnswerSlotInSentencePre.html(sentenceSplited[0]);
+    categoryAnswerSlotInSentencePos.html('');
+  } else if (sentenceSplited.length > 1) {
+    categoryAnswerSlotInSentencePre.html(sentenceSplited[0]);
+    categoryAnswerSlotInSentencePos.html(sentenceSplited[1]);
+  } else {
+    //Error
+    categoryAnswerSlotInSentencePre.html('');
+    categoryAnswerSlotInSentencePos.html('');
+  }
+  categoryAnswerSlotInSentence.html('_____');
+  categoryTextInput.value('');
+}
+
 function Answer(questionIndex, question, answerString) {
   this.questionIndex = questionIndex;
   this.question = question;
   this.answerString = answerString;
+}
+
+function updateAnswerOnInput() {
+  categoryAnswerSlotInSentence.html(categoryTextInput.value());
 }
 
 function confirmCategory() {
@@ -255,10 +284,8 @@ function confirmCategory() {
     let answer = new Answer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
     socket.emit('sendAnswer', answer);
   }
-  if(currentCategoryIndex + 1 < categoriesList.length) {
-    currentCategoryIndex++;
-    currentCategory.html(categoriesList[currentCategoryIndex]);
-    categoryTextInput.value('');
+  if(currentCategoryIndex+1 < categoriesList.length) {
+    updateCurrentCategoryDisplayed(currentCategoryIndex+1);
   } else {
     //Finished
     currentCategory.html('');
