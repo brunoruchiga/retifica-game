@@ -327,8 +327,7 @@ function archiveAnswers(newAnswers) {
           parsedData[newAnswers[tempCategoryIndex].category].push(newAnswers[tempCategoryIndex].answers[i].answerString);
         }
       }
-      // let jsonData = JSON.stringify(parsedData);
-      let jsonData = '{}';
+      let jsonData = JSON.stringify(parsedData);
       fs.writeFile("public/other/globalAnswersArchive.json", jsonData, (err) => {
         if (err) console.log(err);
         console.log("Answers archived in Heroku");
