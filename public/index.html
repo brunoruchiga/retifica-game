@@ -244,6 +244,8 @@
       /* End W3.CSS */
     </style>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@600;700&display=swap');
+
       body {
         background-color: #161616;
         color:#ddd;
@@ -268,6 +270,10 @@
       }
       #game-round-container p {
         margin:0.25em 0;
+      }
+      .current-category-text {
+        font-family: 'Zilla Slab', serif;
+        font-size:150%;
       }
       .result-category {
         color: #bbb;
@@ -315,9 +321,9 @@
           <div id='categories-container'>
             <p id='current-category' class='hidden'></p>
             <p>
-              <span id='answer-slot-in-sentence-pre'>Este é um teste de </span>
-              <span id='answer-slot-in-sentence' class='w3-black' style='padding-left:0.5em;padding-right:0.5em;'>slot no meio da frase</span>
-              <span id='answer-slot-in-sentence-pos'> para ver como fica.</span>
+              <span id='answer-slot-in-sentence-pre' class='current-category-text'>Este é um teste de </span>
+              <span id='answer-slot-in-sentence' class='w3-black current-category-text' style='padding-left:0.5em;padding-right:0.5em;'>slot no meio da frase</span>
+              <span id='answer-slot-in-sentence-pos' class='current-category-text'> para ver como fica.</span>
             </p>
             <input type='text' id='category-input' class='w3-input w3-black w3-xlarge' maxlength='240' autocomplete="off"/>
             <button id='confirm-category' class='w3-btn w3-black'>Retificado!</button>
@@ -343,7 +349,7 @@
       </div>
 
       <div id='footer' class='w3-container w3-tiny'>
-        <p>Criado por <a href='http://brunoruchiga.com/'>Bruno Ruchiga</a></p>
+        <p>Criado por <a href='http://brunoruchiga.com/'>Bruno Ruchiga</a>. Versão Alpha.</p>
         <p>
           <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/2.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.
           <br>Algumas das frases baseadas no jogo Cards Against Humanity, sob a licença Creative Commons BY-NC-SA 2.0.
