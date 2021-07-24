@@ -1,5 +1,6 @@
 console.log('\n\n//////////////////////////////////////////')
 console.log('Server running')
+require('dotenv').config()
 
 const express = require('express');
 const app = express();
