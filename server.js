@@ -318,17 +318,16 @@ function archiveAnswers(newAnswers) {
   const file = fs.createWriteStream("public/other/globalAnswersArchive.json");
   https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/globalAnswersArchive.json", response => {
     response.on('data', function(d) {
-      // let parsedData = JSON.parse(d.toString());
-      // for(let tempCategoryIndex = 0; tempCategoryIndex < newAnswers.length; tempCategoryIndex++) {
-      //   for(let i = 0; i < newAnswers[tempCategoryIndex].answers.length; i++) {
-      //     if(!parsedData[newAnswers[tempCategoryIndex].category]) {
-      //       parsedData[newAnswers[tempCategoryIndex].category] = [];
-      //     }
-      //     parsedData[newAnswers[tempCategoryIndex].category].push(newAnswers[tempCategoryIndex].answers[i].answerString);
-      //   }
-      // }
-      // let jsonData = JSON.stringify(parsedData);
-      let jsonData = '{}';
+      let parsedData = JSON.parse(d.toString());
+      for(let tempCategoryIndex = 0; tempCategoryIndex < newAnswers.length; tempCategoryIndex++) {
+        for(let i = 0; i < newAnswers[tempCategoryIndex].answers.length; i++) {
+          if(!parsedData[newAnswers[tempCategoryIndex].category]) {
+            parsedData[newAnswers[tempCategoryIndex].category] = [];
+          }
+          parsedData[newAnswers[tempCategoryIndex].category].push(newAnswers[tempCategoryIndex].answers[i].answerString);
+        }
+      }
+      let jsonData = JSON.stringify(parsedData);
       fs.writeFile("public/other/globalAnswersArchive.json", jsonData, (err) => {
         if (err) console.log(err);
         console.log("Answers archived in Heroku");
