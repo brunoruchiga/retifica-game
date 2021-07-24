@@ -32,6 +32,7 @@ let categoryTextInput;
 let confirmCategoryButton;
 let currentCategoryIndex;
 let categoriesList;
+let waitingEndFeedbackMessage;
 
 let timer;
 
@@ -97,6 +98,7 @@ function initializeHtmlElements() {
   categoryTextInput = select('#category-input').input(updateAnswerOnInput);
   confirmCategoryButton = select('#confirm-category').mousePressed(confirmCategory);
   handleEnterKey(categoryTextInput, confirmCategory);
+  waitingEndFeedbackMessage = select('#waiting-end');
 
   chat.container = select('#chat-container');
   chat.messageInput = select('#chat-message-input');
@@ -204,7 +206,7 @@ function handleUserJoinedGame(data) {
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
   for(let i = 0; i < data.length; i++) {
-    createElement('li', data[i]).class('w3-padding-small').parent(activeUsernamesListContainer);
+    createElement('li', data[i]).addClass('w3-padding-small').parent(activeUsernamesListContainer);
   }
 }
 
@@ -304,6 +306,7 @@ function confirmCategory() {
     clearCurrentCategoryDisplayed();
     categoryTextInput.value('');
     changeVisibility(categoriesContainer, false);
+    changeVisibility(waitingEndFeedbackMessage, true);
   }
 }
 
@@ -317,12 +320,28 @@ function presentAllAnswers(data) {
   resultsContainer.html('');
   for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
     if(data[tempCategoryIndex].answers.length > 0) { //If received at least 1 answer
-      createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
+      //createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
       for(let i = 0; i < data[tempCategoryIndex].answers.length; i++) {
-        createP(data[tempCategoryIndex].answers[i].answerString).addClass('result-answer').parent(resultsContainer);
+        //createP(data[tempCategoryIndex].answers[i].answerString).addClass('result-answer').parent(resultsContainer);
+        createFormatedAnswerInParent(data[tempCategoryIndex].category, data[tempCategoryIndex].answers[i].answerString, resultsContainer);
       }
       createElement('hr').parent(resultsContainer);
     }
+  }
+}
+
+function createFormatedAnswerInParent(sentence, answer, targetParent) {
+  let sentenceSplited = String(sentence).split('___');
+  let pContainer = createP('').addClass('category').parent(targetParent);
+  if(sentenceSplited.length == 1) {
+    createSpan(sentenceSplited[0] + '<br/>').parent(pContainer);
+    createSpan(answer).addClass('w3-black').addClass('category-answer').parent(pContainer);
+  } else if (sentenceSplited.length > 1) {
+    createSpan(sentenceSplited[0]).parent(pContainer);
+    createSpan(answer).addClass('w3-black').addClass('category-answer').parent(pContainer);
+    createSpan(sentenceSplited[1]).parent(pContainer);
+  } else {
+    //Error
   }
 }
 
@@ -381,6 +400,7 @@ function getAllElements() {
     restartButton,
     gameRoundContainer,
     categoriesContainer,
+    waitingEndFeedbackMessage,
     resultsContainer,
     chat.container,
     suggestions.container

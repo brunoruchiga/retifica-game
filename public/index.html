@@ -275,9 +275,14 @@
       #current-category {
         padding:1em 0;
       }
-      .current-category-text {
+      .category {
+        margin:0.5em 0;
         font-family: 'Zilla Slab', serif;
         font-size:150%;
+      }
+      .category-answer {
+        padding-left:0.5em;
+        padding-right:0.5em;
       }
       #category-input {
         font-weight: normal;
@@ -325,21 +330,22 @@
       </div>
 
       <div id='container-body' class='w3-panel'>
-        <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar!</button>
-        <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Reiniciar</button>
+        <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar →</button>
         <div id='game-round-container'>
           <p>[Letra: <span id='random-letter'>_</span>] [Tempo: <span id='timer'>_</span>]</p>
           <div id='categories-container'>
-            <p id='current-category'>
+            <p id='current-category' class='category'>
               <span id='answer-slot-in-sentence-pre' class='current-category-text'>Este é um teste de </span>
-              <span id='answer-slot-in-sentence' class='w3-black current-category-text' style='padding-left:0.5em;padding-right:0.5em;'>slot no meio da frase</span>
+              <span id='answer-slot-in-sentence' class='w3-black current-category-text category-answer'>slot no meio da frase</span>
               <span id='answer-slot-in-sentence-pos' class='current-category-text'> para ver como fica.</span>
             </p>
             <input type='text' id='category-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
             <button id='confirm-category' class='w3-btn w3-black'>Retificado!</button>
           </div>
+          <div id='waiting-end' class='hidden'><p>Aguardando fim do jogo...</p></div>
         </div>
         <div id='results-container' class='container'></div>
+        <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Novo jogo ↺</button>
         <div id='usernames-list-container' class='container w3-small'>
           <p style='margin-bottom:0;'><strong>Usuários conectados:</strong></p>
           <ul id='usernames-list' class='w3-ul'></ul>

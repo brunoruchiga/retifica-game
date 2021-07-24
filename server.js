@@ -128,7 +128,7 @@ function Room(room) {
       this.clients[i].answers = [];
     }
 
-    let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let alphabet = 'AAABBBCCCDDDEEEFFFGGGHIIIJJJKLLLMMMNNNOOOPPPQQRRRSSSTTTUUUVVWXYZ';
     let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
     let totalTime = 60;
     let activeCategoriesThisRound = this.getCategoriesForThisRound(5);
