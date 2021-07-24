@@ -159,11 +159,34 @@ function Room(room) {
       this.serverTimer = this.serverTimer - 1;
       this.timerSetTimeoutFunction = setTimeout(()=>{this.updateTimer()}, 1000);
       io.to(this.room).emit('tickSecond', {timeCurrentValue: this.serverTimer});
+      this.checkEarlyEnd();
     } else {
-      this.gameState.state = 'results';
-      io.to(this.room).emit('serverTimerExpired', this.getAnswersForAllCategories());
       console.log('Timer expired!');
+      this.finishRound();
     }
+  }
+
+  this.checkEarlyEnd = function() {
+    let haveEveryoneFinished = true;
+    for(let i = 0; i < this.clients.length; i++) {
+      if(this.clients[i].socket) {
+        if(this.clients[i].answers.length < this.gameState.roundInfo.categories.length) {
+          haveEveryoneFinished = false;
+          return;
+        }
+      }
+    }
+    if(haveEveryoneFinished) {
+      this.finishRound();
+      return;
+    }
+  }
+
+  this.finishRound = function() {
+    clearTimeout(this.timerSetTimeoutFunction);
+    this.gameState.state = 'results';
+    io.to(this.room).emit('serverTimerExpired', this.getAnswersForAllCategories());
+    console.log('Round finished!');
   }
 
   this.getCategoriesForThisRound = function(amount) {

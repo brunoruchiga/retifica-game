@@ -298,6 +298,8 @@ function confirmCategory() {
   if(categoryTextInput.value() != '') {
     let answer = new Answer(currentCategoryIndex, categoriesList[currentCategoryIndex], categoryTextInput.value());
     socket.emit('sendAnswer', answer);
+  } else {
+    categoriesList.push(categoriesList[currentCategoryIndex]);
   }
   if(currentCategoryIndex+1 < categoriesList.length) {
     updateCurrentCategoryDisplayed(currentCategoryIndex+1);
