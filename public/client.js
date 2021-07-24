@@ -274,11 +274,13 @@ function presentAllAnswers(data) {
   console.log(data);
   resultsContainer.html('');
   for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
-    createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
-    for(let i = 0; i < data[tempCategoryIndex].answers.length; i++) {
-      createP(data[tempCategoryIndex].answers[i].answerString).addClass('result-answer').parent(resultsContainer);
+    if(data[tempCategoryIndex].answers.length > 0) { //If received at least 1 answer
+      createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
+      for(let i = 0; i < data[tempCategoryIndex].answers.length; i++) {
+        createP(data[tempCategoryIndex].answers[i].answerString).addClass('result-answer').parent(resultsContainer);
+      }
+      createElement('hr').parent(resultsContainer);
     }
-    createElement('hr').parent(resultsContainer);;
   }
 }
 
