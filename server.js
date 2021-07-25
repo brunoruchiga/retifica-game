@@ -322,6 +322,7 @@ function Room(room) {
 
 let questions = [
   'Nome de idoso',
+  'Nome de cachorro',
   'Lugar onde já chorei',
   'Novo sabor de miojo: ___!',
   'Um ótimo presente para o Dia dos Namorados',
@@ -340,7 +341,19 @@ let questions = [
   '___ deveria ser ilegal',
   'Fui no cinema pra ver ___',
   'Corno(a) famoso(a)',
-
+  'Novo curso do Senac',
+  'Mamãe está há horas tentando falar com o suporte técnico da ___',
+  'Oferecimento: ___',
+  'Artista do SBT',
+  'Minha próxima viagem vai ser para ___',
+  'Se ___, não dirija',
+  'Tua piscina está cheia de ___',
+  'Seria inapropriado ___ na sala de espera do dentista',
+  'O ingrediente secreto da minha torta é ___',
+  'A mestre confeiteira da fábrica garantiu ser normal todas as barras de chocolate terem pelo menos 2% de ___',
+  'Profissão do futuro: ___',
+  'Você nunca deve misturar ___ com bebida',
+  
 
   //Cards Against Humanity
   //Cards Against Humanity is free to use under the Creative Commons BY-NC-SA 2.0 License. You can read more about the license at http://creativecommons.org/licenses/by-nc-sa/2.0/
@@ -365,6 +378,18 @@ let questions = [
   'Por que não consigo dormir a noite?',
   'O Campeonato Mundial de ___',
   'Quando eu for milionário, vou mandar erguer uma estátua de 10 metros de altura para celebrar ___',
+  '___: O Musical',
+
+  //https://www.reddit.com/r/northernlion/comments/duhk4u/128_quiplash_prompts/
+  'Desenho animado',
+  'Personagem que seria um bom presidente',
+
+  //https://www.trueachievements.com/a208499/quiplash-xl-back-talk-achievement
+  'O segredo para uma vida feliz',
+  'Eu aprendi que jamais se deve colocar ___ na pizza',
+
+
+
 ]
 
 function getRandomizedQuestions() {
