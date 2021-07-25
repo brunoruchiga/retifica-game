@@ -25,6 +25,7 @@ let resultsContainer;
 let randomLetterSlot;
 let timerSlot;
 let categoriesContainer;
+let currentCategoryContainer;
 let categoryAnswerSlotInSentence;
 let categoryAnswerSlotInSentencePre;
 let categoryAnswerSlotInSentencePos;
@@ -92,6 +93,7 @@ function initializeHtmlElements() {
   randomLetterSlot = select('#random-letter');
   timerSlot = select('#timer');
   categoriesContainer = select('#categories-container');
+  currentCategoryContainer = select('#current-category');
   categoryAnswerSlotInSentence = select('#answer-slot-in-sentence');
   categoryAnswerSlotInSentencePre = select('#answer-slot-in-sentence-pre');
   categoryAnswerSlotInSentencePos = select('#answer-slot-in-sentence-pos');
@@ -160,6 +162,7 @@ function setupSocket() {
   socket.on('userJoinedGame', handleUserJoinedGame);
   socket.on('usernameConfirmed', handleUsernameConfirmed);
   socket.on('gameStarted', initializeGame);
+  socket.on('votesUpdated', handleVotesUpdated);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('tickSecond', handleTickSecond);
   socket.on('serverTimerExpired', handleGameRoundEnded);
@@ -204,9 +207,16 @@ function handleUserJoinedGame(data) {
 }
 
 function handleActiveUsersListUpdated(data) {
+  console.log(data);
   activeUsernamesListContainer.html('');
   for(let i = 0; i < data.length; i++) {
-    createElement('li', data[i]).addClass('w3-padding-small').parent(activeUsernamesListContainer);
+    let text;
+    if(data[i].score > 0) {
+      text = data[i].username + ' ★'+data[i].score;
+    } else {
+      text = data[i].username;
+    }
+    createElement('li', text).addClass('w3-padding-small').parent(activeUsernamesListContainer);
   }
 }
 
@@ -236,12 +246,13 @@ function updateTimer() {
 */
 
 function initializeGame(data) {
-  randomLetterSlot.html(data.randomLetter);
+  let roundInfo = data;
+  randomLetterSlot.html(roundInfo.randomLetter);
 
   categoriesList = [];
-  for(let i = 0; i < data.categories.length; i++) {
+  for(let i = 0; i < roundInfo.categories.length; i++) {
     categoriesList.push({
-      categoryString: data.categories[i],
+      categoryString: roundInfo.categories[i].categoryString,
       confirmed: false,
       indexOnServer: i
     });
@@ -271,6 +282,8 @@ function updateCurrentCategoryDisplayed(index) {
   }
   categoryAnswerSlotInSentence.html('_____');
   categoryTextInput.value('');
+
+  // playCssAnimation(currentCategoryContainer, 'animate-intro-question');
 }
 function clearCurrentCategoryDisplayed() {
   currentCategoryIndex = 0;
@@ -328,21 +341,35 @@ function handleGameRoundEnded(data) {
 function presentAllAnswers(data) {
   console.log(data);
   resultsContainer.html('');
+  createElement('hr').parent(resultsContainer);
   for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
-    if(data[tempCategoryIndex].answers.length > 0) { //If received at least 1 answer
-      //createP(data[tempCategoryIndex].category).addClass('result-category').parent(resultsContainer);
-      for(let i = 0; i < data[tempCategoryIndex].answers.length; i++) {
-        //createP(data[tempCategoryIndex].answers[i].answerString).addClass('result-answer').parent(resultsContainer);
-        createFormatedAnswerInParent(data[tempCategoryIndex].category, data[tempCategoryIndex].answers[i].answerString, resultsContainer);
+    answersUser = Object.keys(data[tempCategoryIndex].answers);
+    if(answersUser.length > 0) { //If received answer from at least 1 user
+      for(let i = 0; i < answersUser.length; i++) {
+        createFormatedAnswerInParent(
+          data[tempCategoryIndex].categoryString,
+          data[tempCategoryIndex].answers[answersUser[i]].answerString,
+          tempCategoryIndex,
+          answersUser[i],
+          data[tempCategoryIndex].answers[answersUser[i]].votes,
+          resultsContainer
+        );
       }
       createElement('hr').parent(resultsContainer);
     }
   }
 }
 
-function createFormatedAnswerInParent(sentence, answer, targetParent) {
+function createFormatedAnswerInParent(sentence, answer, categoryIndex, answerUser, votes, targetParent) {
+  //Button
+  let sentenceButton = createButton('').addClass('w3-btn').addClass('container-button').parent(targetParent);
+  sentenceButton.mousePressed(()=>{
+    voteFor(categoryIndex, answerUser);
+  });
+
+  //Content
+  let pContainer = createP('').addClass('category').parent(sentenceButton);
   let sentenceSplited = String(sentence).split('___');
-  let pContainer = createP('').addClass('category').parent(targetParent);
   if(sentenceSplited.length == 1) {
     createSpan(sentenceSplited[0] + '<br/>').parent(pContainer);
     createSpan(answer).addClass('w3-black').addClass('category-answer').parent(pContainer);
@@ -353,6 +380,32 @@ function createFormatedAnswerInParent(sentence, answer, targetParent) {
   } else {
     //Error
   }
+
+  //Votes
+  if(votes.length > 0) {
+    let answersContainer = createDiv('').parent(targetParent);
+    for(let i = 0; i < votes.length; i++) {
+      // createDiv('★ '+votes[i]).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-tiny').parent(answersContainer);
+      createDiv('★').addClass('vote-from').parent(answersContainer);
+    }
+    // createDiv('★ '+votes.length).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-small').parent(answersContainer);
+  }
+}
+
+function voteFor(categoryIndex, answerUser) {
+  let vote = {
+    votingUser: username,
+    categoryIndex: categoryIndex,
+    votedUser: answerUser
+  }
+  if(answerUser == username) {
+    return;
+  }
+  socket.emit('sendVote', vote);
+}
+
+function handleVotesUpdated(data) {
+  presentAllAnswers(data);
 }
 
 function handleSendMessageButtonClicked() {

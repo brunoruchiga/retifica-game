@@ -47,6 +47,9 @@ function handleConnection(socket) {
     socket.to(data.room).on('sendAnswer', (d)=>{
       rooms[data.room].handleAnswerSent(d, socket);
     });
+    socket.to(data.room).on('sendVote', (d)=>{
+      rooms[data.room].handleNewVote(d, socket);
+    });
     socket.to(data.room).on('chatMessageSent', (d)=>{
       rooms[data.room].handleChatMessage(d, socket);
     });
@@ -66,6 +69,7 @@ function Client(socket) {
   this.username = '';
   this.socket = socket;
   this.answers = [];
+  this.score = 0;
 }
 
 function GameState() {
@@ -93,7 +97,7 @@ function Room(room) {
         while(this.findUserByUsername(differentUsernameGenerated + counter)) {
           counter++;
         }
-        this.changeUsername(differentUsernameGenerated + counter, socket);
+        user = this.createUserByUsername(differentUsernameGenerated + counter, socket);
       }
     } else {
       //If username is not in list, attribute username to this socket
@@ -193,14 +197,23 @@ function Room(room) {
     if(amount > this.allQuestionsRandomized.length) {
       this.allQuestionsRandomized = getRandomizedQuestions();
     }
-    return this.allQuestionsRandomized.splice(0, amount);
+    let categoryStringsForThisRound = this.allQuestionsRandomized.splice(0, amount);
+    let categoryObjectsForThisRound = [];
+    for(let i = 0; i < categoryStringsForThisRound.length; i++) {
+      categoryObjectsForThisRound.push({
+        categoryString: categoryStringsForThisRound[i][0], //TODO: I don't know why it's an array of length 1 here
+        answers: {}
+      });
+    }
+    return categoryObjectsForThisRound;
   }
 
   this.getAnswersForAllCategories = function() {
+    //TODO: Refactor archiving
     let answersForAllCategories = [];
     for(let categoryIndex = 0; categoryIndex < this.gameState.roundInfo.categories.length; categoryIndex++) {
       let categoryAnswer = {
-        category: this.gameState.roundInfo.categories[categoryIndex],
+        category: this.gameState.roundInfo.categories[categoryIndex].categoryString,
         answers: []
       }
       answersForAllCategories.push(categoryAnswer);
@@ -219,16 +232,44 @@ function Room(room) {
       }
     }
     archiveAnswers(answersForAllCategories);
-    return answersForAllCategories;
+    //END REFACTOR ARCHIVING
+
+    return this.gameState.roundInfo.categories;
+  }
+
+  this.handleNewVote = function(data) {
+    let targetCategory = this.gameState.roundInfo.categories[data.categoryIndex];
+    let targetAnswer = targetCategory.answers[data.votedUser]
+
+    let keys = Object.keys(targetCategory.answers)
+    for(let i = 0; i < keys.length; i++) {
+      if(targetCategory.answers[keys[i]].votes.includes(data.votingUser)) {
+        return;
+      }
+    }
+    // if(!targetAnswer.votes.includes(data.votingUser)) {
+    targetAnswer.votes.push(data.votingUser);
+    io.to(this.room).emit('votesUpdated', this.gameState.roundInfo.categories);
+    // }
+
+    let user = this.findUserByUsername(data.votedUser);
+    if(user) {
+      user.score++;
+    }
+    io.to(this.room).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
   }
 
   this.getListOfActiveUsernames = function() {
     let activeUsernames = [];
     for(let i = 0; i < this.clients.length; i++) {
       if(this.clients[i].socket) {
-        activeUsernames.push(this.clients[i].username);
+        activeUsernames.push({
+          username: this.clients[i].username,
+          score: this.clients[i].score
+        });
       }
     }
+    console.log(activeUsernames);
     return activeUsernames;
   }
 
@@ -252,6 +293,11 @@ function Room(room) {
         user.answers.push(data);
       }
     }
+    let answer = {
+      answerString: data.answerString,
+      votes: []
+    };
+    this.gameState.roundInfo.categories[data.questionIndex].answers[user.username] = answer;
   }
 
   this.getUser = function(id) {

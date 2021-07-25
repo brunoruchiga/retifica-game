@@ -302,6 +302,31 @@
       .result-answer {
         font-weight: bold;
       }
+      .container-button {
+        padding:0.5em 0;
+        margin:0;
+        width:100%;
+        text-align: left;
+        color:inherit;
+        background-color: inherit;
+        white-space: nowrap;
+        white-space: inherit;
+      }
+      .container-button:hover {
+        box-shadow: 0 0;
+        background-color:#333;
+      }
+      .container-button p {
+        margin:0;
+        line-height: 1.25;
+      }
+      .vote-from {
+        padding:2px 8px;
+        margin:-8px 4px 4px 0;
+        display:inline-block;
+        border-radius: 10px;
+        cursor: default;
+      }
       #messages-container {
         height:140px;
         overflow: auto;
@@ -315,6 +340,23 @@
       }
       .animate-show{animation:showElement 0.2s}@keyframes showElement{from{opacity:0} to{opacity:1}}
       .animate-hide{animation:hideElement 0.2s}@keyframes hideElement{from{opacity:1} to{opacity:0}}
+      .animate-fav{animation:animateFav 0.3s}@keyframes animateFav{
+        0%   {opacity:0; transform:scale(0);}
+        80% {opacity:1; transform:scale(1.2);}
+        100% {opacity:1; transform:scale(1);}
+          animation-timing-function: ease-out;
+        }
+      }
+      .animate-out-question{animation:outQuestion 0.2s}@keyframes outQuestion{
+        0%   {opacity:1; transform:scale(1);}
+        100% {opacity:0; transform:scale(0.8);}
+        animation-timing-function: ease-out;
+      }
+      .animate-intro-question{animation:introQuestion 0.5s}@keyframes introQuestion{
+        0%   {opacity:0; transform:scale(1); transform:translate(300px, 0px);}
+        100% {opacity:1; transform:scale(1); transform:translate(0px, 0px);}
+        animation-timing-function: ease-out;
+      }
     </style>
 
   </head>
@@ -356,7 +398,7 @@
         <div id='results-container' class='container'></div>
         <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Novo jogo ↺</button>
         <div id='usernames-list-container' class='container w3-small'>
-          <p style='margin-bottom:0;'><strong>Usuários conectados:</strong></p>
+          <p style='margin-bottom:0;'><strong>Quadro de pontuação:</strong></p>
           <ul id='usernames-list' class='w3-ul'></ul>
         </div>
         <div id='chat-container' class='container w3-small'>
