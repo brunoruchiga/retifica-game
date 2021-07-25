@@ -335,93 +335,6 @@ function Room(room) {
   }
 }
 
-let questions = [
-  'Nome de idoso',
-  'Nome de cachorro',
-  'Lugar onde já chorei',
-  'Novo sabor de miojo: ___!',
-  'Um ótimo presente para o Dia dos Namorados',
-  'Artista ruim',
-  'Eu reprovei na prova de ___',
-  '___: Nova série original GloboPlay',
-  'Quando a pandemia abacar, eu vou ___ muito',
-  'Esta é uma manifestação muito importante para conscientizar toda a sociedade sobre o problema com ___',
-  'Essa cicatriz aqui na perna foi causada por ___',
-  'Fátima, é um prazer estar aqui no seu programa para poder falar sobre ___',
-  '___ foi proibido nas Olimpíadas por ser considerado muito perigoso',
-  'Rolê bad vibe',
-  'Fui cancelado por ___',
-  'Urgente: Polícia Federal deflagra nova fase da Operação ___',
-  'Novo app revolucionário',
-  '___ deveria ser ilegal',
-  'Fui no cinema pra ver ___',
-  'Corno(a) famoso(a)',
-  'Novo curso do Senac',
-  'Mamãe está há horas tentando falar com o suporte técnico da ___',
-  'Oferecimento: ___',
-  'Artista do SBT',
-  'Minha próxima viagem vai ser para ___',
-  'Se ___, não dirija',
-  'Tua piscina está cheia de ___',
-  'Seria inapropriado ___ na sala de espera do dentista',
-  'O ingrediente secreto da minha torta é ___',
-  'A mestre confeiteira da fábrica garantiu ser normal todas as barras de chocolate terem pelo menos 2% de ___',
-  'Profissão do futuro: ___',
-  'Você nunca deve misturar ___ com bebida',
-
-
-  //Cards Against Humanity
-  //Cards Against Humanity is free to use under the Creative Commons BY-NC-SA 2.0 License. You can read more about the license at http://creativecommons.org/licenses/by-nc-sa/2.0/
-  //This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License.
-  'Por motivos de segurança, a ANAC proibiu ___ em todos os aviões',
-  'Animou a torcida e comemorou o gol fazendo a dancinha do ___!',
-  'Desculpa, professor, mas o ___ destruiu meu dever de casa',
-  'E o prêmio de melhor ___ vai para...',
-  'Cara, NÃO VAI no banheiro, tem ___ lá',
-  'Como eu perdi minha virgindade?',
-  'Lamentável que as crianças de hoje estão se envolvendo com ___ tão cedo',
-  'Qual é meu poder secreto?',
-  'Nenhum jantar romântico estaria completo sem ___',
-  'A excursão escolar da terceira série foi completamente arruinada por ___',
-  'Ministério da ___',
-  'Não era amor, era ___',
-  'A gente terminou porque ele era muito ___',
-  'Passarinho! Que som é esse? Esse é o som de ___',
-  'De acordo com os exames, você foi acometido por um caso típico de ___',
-  'Nova animação da Pixar: e se ___ tivessem vida?',
-  'Que cheiro é esse?',
-  'Por que não consigo dormir a noite?',
-  'O Campeonato Mundial de ___',
-  'Quando eu for milionário, vou mandar erguer uma estátua de 10 metros de altura para celebrar ___',
-  '___: O Musical',
-
-  //https://www.reddit.com/r/northernlion/comments/duhk4u/128_quiplash_prompts/
-  'Desenho animado',
-  'Personagem que seria um bom presidente',
-
-  //https://www.trueachievements.com/a208499/quiplash-xl-back-talk-achievement
-  'O segredo para uma vida feliz',
-  'Eu aprendi que jamais se deve colocar ___ na pizza',
-
-
-
-]
-
-function getRandomizedQuestions() {
-  return shuffle(questions);
-}
-
-function shuffle(array) {
-  let arrayClone = array.slice();
-  let randomizedArray = []
-  while (arrayClone.length > 0) {
-    let randomIndex = Math.floor(Math.random() * arrayClone.length);
-    let randomElement = arrayClone.splice(randomIndex, 1);
-    randomizedArray.push(randomElement);
-  }
-  return randomizedArray;
-}
-
 let isEdittingArchiveAnswersFile = false;
 function archiveAnswers(newAnswers) {
   if(isEdittingArchiveAnswersFile) {
@@ -525,4 +438,89 @@ function cleanNonActiveRooms() {
 
 function filteredText(text) {
   return String(text).replace(/\<.*?\>/, '');
+}
+
+let questions = [
+  'Nome de idoso',
+  'Nome de cachorro',
+  'Lugar onde já chorei',
+  'Novo sabor de miojo: ___!',
+  'Um ótimo presente para o Dia dos Namorados',
+  'Artista ruim',
+  'Eu reprovei na prova de ___',
+  '___: Nova série original GloboPlay',
+  'Quando a pandemia abacar, eu vou ___ muito',
+  'Esta é uma manifestação muito importante para conscientizar toda a sociedade sobre o problema com ___',
+  'Essa cicatriz aqui na perna foi causada por ___',
+  'Fátima, é um prazer estar aqui no seu programa para poder falar sobre ___',
+  '___ foi proibido nas Olimpíadas por ser considerado muito perigoso',
+  'Rolê bad vibe',
+  'Fui cancelado por ___',
+  'Urgente: Polícia Federal deflagra nova fase da Operação ___',
+  'Novo app revolucionário',
+  '___ deveria ser ilegal',
+  'Fui no cinema pra ver ___',
+  'Corno(a) famoso(a)',
+  'Novo curso do Senac: ___ e Automação',
+  'Mamãe está há horas tentando falar com o suporte técnico da ___',
+  'Oferecimento: ___',
+  'Artista do SBT',
+  'Minha próxima viagem vai ser para ___',
+  'Se ___, não dirija',
+  'Tua piscina está cheia de ___',
+  'Seria inapropriado ___ na sala de espera do dentista',
+  'O ingrediente secreto da minha torta é ___',
+  'A mestre confeiteira da fábrica garantiu ser normal todas as barras de chocolate terem pelo menos 4% de ___',
+  'Saiba mais sobre ___, a profissão do futuro',
+  'Você nunca deve misturar ___ com bebida',
+
+
+  //Cards Against Humanity
+  //Cards Against Humanity is free to use under the Creative Commons BY-NC-SA 2.0 License. You can read more about the license at http://creativecommons.org/licenses/by-nc-sa/2.0/
+  //This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License.
+  'Por motivos de segurança, a ANAC proibiu ___ em todos os aviões',
+  'Animou a torcida e comemorou o gol fazendo a dancinha do ___!',
+  'Desculpa, professor, mas o ___ destruiu meu dever de casa',
+  'E o prêmio de melhor ___ vai para...',
+  'Cara, NÃO VAI no banheiro, tem ___ lá',
+  'Lamentável que as crianças de hoje estão se envolvendo com ___ tão cedo',
+  'Qual é meu poder secreto?',
+  'Nenhum jantar romântico estaria completo sem ___',
+  'A excursão escolar da terceira série foi completamente arruinada por ___',
+  'Ministério da ___',
+  'Não era amor, era ___',
+  'A gente terminou porque ele era muito ___',
+  'Passarinho! Que som é esse? Esse é o som de ___',
+  'De acordo com os exames, você foi acometido por um caso típico de ___',
+  'Nova animação da Pixar: e se ___ tivessem vida?',
+  'Que cheiro é esse?',
+  'Por que não consigo dormir a noite?',
+  'O Campeonato Mundial de ___',
+  'Quando eu for milionário, vou mandar erguer uma estátua de 10 metros de altura para celebrar ___',
+  '___: O Musical',
+  'Não sei com que armas será lutada a 3ª Guerra Mundial, mas a 4ª Guerra Mundial será com ___',
+  // 'Como eu perdi minha virgindade?',
+
+  //https://www.reddit.com/r/northernlion/comments/duhk4u/128_quiplash_prompts/
+  'Desenho animado',
+  'Personagem que seria um bom presidente',
+
+  //https://www.trueachievements.com/a208499/quiplash-xl-back-talk-achievement
+  'O segredo para uma vida feliz:',
+  'Eu aprendi que jamais se deve colocar ___ na pizza',
+]
+
+function getRandomizedQuestions() {
+  return shuffle(questions);
+}
+
+function shuffle(array) {
+  let arrayClone = array.slice();
+  let randomizedArray = []
+  while (arrayClone.length > 0) {
+    let randomIndex = Math.floor(Math.random() * arrayClone.length);
+    let randomElement = arrayClone.splice(randomIndex, 1);
+    randomizedArray.push(randomElement);
+  }
+  return randomizedArray;
 }
