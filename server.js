@@ -289,6 +289,12 @@ let questions = [
   '___ foi proibido nas Olimpíadas por ser considerado muito perigoso',
   'Rolê bad vibe',
   'Fui cancelado por ___',
+  'Urgente: Polícia Federal deflagra nova fase da Operação ___',
+  'Novo app revolucionário',
+  '___ deveria ser ilegal',
+  'Fui no cinema pra ver ___',
+  'Corno(a) famoso(a)',
+
 
   //Cards Against Humanity
   //Cards Against Humanity is free to use under the Creative Commons BY-NC-SA 2.0 License. You can read more about the license at http://creativecommons.org/licenses/by-nc-sa/2.0/
@@ -312,7 +318,7 @@ let questions = [
   'Que cheiro é esse?',
   'Por que não consigo dormir a noite?',
   'O Campeonato Mundial de ___',
-  'Quando eu foi milionário, vou mandar erguer uma estátua de 10 metros de altura para celebrar ___',
+  'Quando eu for milionário, vou mandar erguer uma estátua de 10 metros de altura para celebrar ___',
 ]
 
 function getRandomizedQuestions() {
