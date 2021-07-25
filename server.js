@@ -473,6 +473,7 @@ let questions = [
   'A mestre confeiteira da fábrica garantiu ser normal todas as barras de chocolate terem pelo menos 4% de ___',
   'Saiba mais sobre ___, a profissão do futuro',
   'Você nunca deve misturar ___ com bebida',
+  'Por favor, não coloque ___ no micro-ondas',
 
 
   //Cards Against Humanity
