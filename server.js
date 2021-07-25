@@ -81,6 +81,7 @@ function GameState() {
 function Room(room) {
   this.room = room;
   this.clients = [];
+  this.active = true;
   this.gameState  = new GameState();
   this.allQuestionsRandomized = getRandomizedQuestions();
 
@@ -283,7 +284,21 @@ function Room(room) {
         }
       }
     }
+
+    let isRoomEmpty = true;
+    for(let i = 0; i < this.clients.length; i++) {
+      if(this.clients[i].socket != undefined) {
+        isRoomEmpty = false;
+      }
+    }
+    if(isRoomEmpty) {
+      this.active = false;
+      cleanNonActiveRooms();
+      return;
+    }
+
     io.to(this.room).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
+
   }
 
   this.handleAnswerSent = function(data, socket) {
@@ -353,7 +368,7 @@ let questions = [
   'A mestre confeiteira da fábrica garantiu ser normal todas as barras de chocolate terem pelo menos 2% de ___',
   'Profissão do futuro: ___',
   'Você nunca deve misturar ___ com bebida',
-  
+
 
   //Cards Against Humanity
   //Cards Against Humanity is free to use under the Creative Commons BY-NC-SA 2.0 License. You can read more about the license at http://creativecommons.org/licenses/by-nc-sa/2.0/
@@ -493,4 +508,15 @@ function uploadFile(file, name, callback) {
     console.log(data);
     callback(data);
   });
+}
+
+function cleanNonActiveRooms() {
+  setTimeout(()=> {
+    let keys = Object.keys(rooms);
+    for(let i = keys.length-1; i >= 0; i--) {
+      if(!rooms[keys[i]].active) {
+        delete rooms[keys[i]];
+      }
+    }
+  }, 100);
 }
