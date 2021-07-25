@@ -207,7 +207,6 @@ function handleUserJoinedGame(data) {
 }
 
 function handleActiveUsersListUpdated(data) {
-  console.log(data);
   activeUsernamesListContainer.html('');
   for(let i = 0; i < data.length; i++) {
     let text;
@@ -299,12 +298,12 @@ function Answer(questionIndex, question, answerString) {
 }
 
 function updateAnswerOnInput() {
-  let answer = categoryTextInput.value();
+  let answer = filteredText(categoryTextInput.value());
 
   if(answer == '') {
     categoryAnswerSlotInSentence.html('_____');
   } else {
-    categoryAnswerSlotInSentence.html(categoryTextInput.value());
+    categoryAnswerSlotInSentence.html(answer);
   }
 }
 
@@ -439,6 +438,7 @@ function sendSuggestion() {
 }
 
 function handleDisconnection(data) {
+  socket.disconnect();
   displayWarning("Você foi desconectado: " + data);
   changeScreenStateTo('START_SCREEN');
 }
@@ -471,8 +471,6 @@ function getAllElements() {
 }
 
 function changeScreenStateTo(newState) {
-  console.log('Screen changed to: ' + newState);
-
   if(newState == 'START_SCREEN') {
     joinData.usernameTextInput.value(username);
     activateOnlyActiveElements([header, footer, containerLogin]);
@@ -520,4 +518,9 @@ function handleEnterKey(textInput, f) {
       f();
     }
   });
+}
+
+
+function filteredText(text) {
+  return String(text).replace(/\<.*?\>/, '');
 }

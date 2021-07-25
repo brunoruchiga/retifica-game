@@ -19,12 +19,16 @@ respostas preenchidas
 
 --x--
 
+- Fase de mostrar resultados/votos mostra uma frase por vez
+- Botão de "like" ou "voto" com ícone
+- Diferenciar *melhor* de *menção honrosa*
 - Visual
 - Animação de frase entrando/saindo/sendo escrita
 - Contador regressivo quando vai começar
-- Fase de mostrar resultados/votos mostra uma frase por vez
 - Apenas host com controle da sala para começar
 - Tempo pode ser personalizado, ou infinito
 - Timer leva em consideração horário inicial
 - Fazer mais perguntas pra lista
 - Lista de temas personalizada
+- Fazer uma resposta aleatório (sortear de outra categoria)
+- Ter versão family-friendly

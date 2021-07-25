@@ -35,33 +35,35 @@ function handleConnection(socket) {
   socket.on('suggestionSent', addSuggestion);
 
   function joinNewUserToRoom(data) {
-    if(!rooms[data.room]) {
-      rooms[data.room] = new Room(data.room);
-    }
-    socket.join(data.room);
-    rooms[data.room].handleRequestToJoinRoomByUsername(data.username, socket);
+    filteredRoomName = filteredText(data.room).toLowerCase().replace(/[^a-zA-Z0-9_]/ig, '');
 
-    socket.to(data.room).on('requestNewGame', ()=>{
-      rooms[data.room].startNewGame();
+    if(!rooms[filteredRoomName]) {
+      rooms[filteredRoomName] = new Room(filteredRoomName);
+    }
+    socket.join(filteredRoomName);
+    rooms[filteredRoomName].handleRequestToJoinRoomByUsername(data.username, socket);
+
+    socket.to(filteredRoomName).on('requestNewGame', ()=>{
+      rooms[filteredRoomName].startNewGame();
     });
-    socket.to(data.room).on('sendAnswer', (d)=>{
-      rooms[data.room].handleAnswerSent(d, socket);
+    socket.to(filteredRoomName).on('sendAnswer', (d)=>{
+      rooms[filteredRoomName].handleAnswerSent(d, socket);
     });
-    socket.to(data.room).on('sendVote', (d)=>{
-      rooms[data.room].handleNewVote(d, socket);
+    socket.to(filteredRoomName).on('sendVote', (d)=>{
+      rooms[filteredRoomName].handleNewVote(d, socket);
     });
-    socket.to(data.room).on('chatMessageSent', (d)=>{
-      rooms[data.room].handleChatMessage(d, socket);
+    socket.to(filteredRoomName).on('chatMessageSent', (d)=>{
+      rooms[filteredRoomName].handleChatMessage(d, socket);
     });
-    socket.to(data.room).on('disconnect', (reason)=>{
-      rooms[data.room].handleDisconnection(reason, socket);
+    socket.to(filteredRoomName).on('disconnect', (reason)=>{
+      rooms[filteredRoomName].handleDisconnection(reason, socket);
     });
 
     io.to(socket.id).emit('userJoinedGame', {
-      room: data.room,
-      gameState:rooms[data.room].gameState
+      room: filteredRoomName,
+      gameState:rooms[filteredRoomName].gameState
     });
-    io.to(data.room).emit('activeUsersListUpdated', rooms[data.room].getListOfActiveUsernames());
+    io.to(filteredRoomName).emit('activeUsersListUpdated', rooms[filteredRoomName].getListOfActiveUsernames());
   }
 }
 
@@ -86,14 +88,15 @@ function Room(room) {
   this.allQuestionsRandomized = getRandomizedQuestions();
 
   this.handleRequestToJoinRoomByUsername = function(username, socket) {
+    let filteredUsername = filteredText(username);
     //Try to find username already in list
-    let user = this.findUserByUsername(username);
+    let user = this.findUserByUsername(filteredUsername);
     //If username was found already in list...
     if(user) {
       if(user.socket == undefined) { //...If there is no socket, attribute this socket to the same user
         user.socket = socket;
       } else {
-        let differentUsernameGenerated = username;
+        let differentUsernameGenerated = filteredUsername;
         let counter = 2;
         while(this.findUserByUsername(differentUsernameGenerated + counter)) {
           counter++;
@@ -102,11 +105,11 @@ function Room(room) {
       }
     } else {
       //If username is not in list, attribute username to this socket
-      user = this.createUserByUsername(username, socket);
+      user = this.createUserByUsername(filteredUsername, socket);
       user.socket = socket;
     }
     this.clients.push(user);
-    console.log('New user joined game: ' + username + ' ' + socket.id);
+    console.log('New user joined room ' + this.room + ': ' + filteredUsername + ' ' + socket.id);
   }
 
   this.findUserByUsername = function(username) {
@@ -123,8 +126,9 @@ function Room(room) {
     if(!user) {
       user = new Client(socket);
     }
-    user.username = newUsername;
-    io.to(socket.id).emit('usernameConfirmed', newUsername);
+    let filteredUsername = filteredText(newUsername);
+    user.username = filteredUsername;
+    io.to(socket.id).emit('usernameConfirmed', filteredUsername);
     return user;
   }
 
@@ -149,8 +153,6 @@ function Room(room) {
     }
     io.to(this.room).emit('gameStarted', this.gameState.roundInfo);
 
-    console.log(this.gameState.roundInfo);
-
     this.initializeTimer(totalTime);
   }
 
@@ -166,7 +168,7 @@ function Room(room) {
       io.to(this.room).emit('tickSecond', {timeCurrentValue: this.serverTimer});
       this.checkEarlyEnd();
     } else {
-      console.log('Timer expired!');
+      //Timer expired
       this.finishRound();
     }
   }
@@ -191,7 +193,6 @@ function Room(room) {
     clearTimeout(this.timerSetTimeoutFunction);
     this.gameState.state = 'results';
     io.to(this.room).emit('serverTimerExpired', this.getAnswersForAllCategories());
-    console.log('Round finished!');
   }
 
   this.getCategoriesForThisRound = function(amount) {
@@ -270,15 +271,15 @@ function Room(room) {
         });
       }
     }
-    console.log(activeUsernames);
     return activeUsernames;
   }
 
   this.handleDisconnection = function(reason, socket) {
-    console.log('Disconnected: ' + socket.id + ' ('+reason+')');
+    console.log('Disconnected from room ' + this.room + ': ' + socket.id + ' ('+reason+')');
     for(let i = 0; i < this.clients.length; i++) {
       if(this.clients[i].socket != undefined) {
         if(this.clients[i].socket.id == socket.id) {
+          this.clients[i].socket.disconnect();
           this.clients[i].socket = undefined;
           break;
         }
@@ -309,7 +310,7 @@ function Room(room) {
       }
     }
     let answer = {
-      answerString: data.answerString,
+      answerString: filteredText(data.answerString),
       votes: []
     };
     this.gameState.roundInfo.categories[data.questionIndex].answers[user.username] = answer;
@@ -327,11 +328,10 @@ function Room(room) {
   }
 
   this.handleChatMessage = function(data, socket) {
-    let filteredMessage = data.replace(/\<.*?\>/, '');
+    let filteredMessage = filteredText(data);
     let message = this.getUser(socket.id).username + ': ' + '<strong>' + filteredMessage + '</strong>';
     io.to(this.room).emit('chatMessageSent', message);
     //io.sockets.emit('message', data);
-    console.log('Chat message sent:', socket.id, message);
   }
 }
 
@@ -445,7 +445,7 @@ function archiveAnswers(newAnswers) {
       }
       let jsonData = JSON.stringify(parsedData);
       fs.writeFile("public/other/globalAnswersArchive.json", jsonData, (err) => {
-        if (err) console.log(err);
+        if (err) return;
         console.log("Answers archived in Heroku");
         uploadFile('public/other/globalAnswersArchive.json', 'globalAnswersArchive.json', function(data) {
           console.log("Answers archived in S3");
@@ -458,13 +458,14 @@ function archiveAnswers(newAnswers) {
 
 let isEdittingSuggestionFile = false;
 function addSuggestion(text) {
+  let filteredSuggestion = filteredText(text);
   if(isEdittingSuggestionFile) {
     //Is file is being written, try again 1s after and abort this function
-    setTimeout(()=>{addSuggestion(text)}, 100);
+    setTimeout(()=>{addSuggestion(filteredSuggestion)}, 100);
     return;
   }
   isEdittingSuggestionFile = true;
-  console.log('[Sugestão]' + text + '[Fim da Sugestão]')
+  console.log('[Suggestion] ' + filteredSuggestion);
   const file = fs.createWriteStream("public/other/sugestoes.txt");
   https.get("https://cards-against-ruchiga.s3.us-east-2.amazonaws.com/sugestoes.txt", response => {
     response.on('data', function(d) {
@@ -474,9 +475,9 @@ function addSuggestion(text) {
       } else {
         prevText = d.toString();
       }
-      let newText = prevText + '\n' + text;
+      let newText = prevText + '\n' + filteredSuggestion;
       fs.writeFile("public/other/sugestoes.txt", newText, (err) => {
-        if (err) console.log(err);
+        if (err) return;
         console.log("Suggestion saved in Heroku");
         uploadFile('public/other/sugestoes.txt', 'sugestoes.txt', function(data) {
           console.log("Suggestion saved in S3");
@@ -502,7 +503,8 @@ function uploadFile(file, name, callback) {
   };
   s3.upload(s3Params, function(err, data) {
     if(err) {
-      console.error(err);
+      //console.error(err);
+      console.log('Error saving file to S3');
       return;
     }
     console.log(data);
@@ -519,4 +521,8 @@ function cleanNonActiveRooms() {
       }
     }
   }, 100);
+}
+
+function filteredText(text) {
+  return String(text).replace(/\<.*?\>/, '');
 }
