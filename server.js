@@ -241,16 +241,16 @@ function Room(room) {
     let targetCategory = this.gameState.roundInfo.categories[data.categoryIndex];
     let targetAnswer = targetCategory.answers[data.votedUser]
 
-    let keys = Object.keys(targetCategory.answers)
-    for(let i = 0; i < keys.length; i++) {
-      if(targetCategory.answers[keys[i]].votes.includes(data.votingUser)) {
-        return;
-      }
-    }
-    // if(!targetAnswer.votes.includes(data.votingUser)) {
-    targetAnswer.votes.push(data.votingUser);
-    io.to(this.room).emit('votesUpdated', this.gameState.roundInfo.categories);
+    // let keys = Object.keys(targetCategory.answers)
+    // for(let i = 0; i < keys.length; i++) {
+    //   if(targetCategory.answers[keys[i]].votes.includes(data.votingUser)) {
+    //     return;
+    //   }
     // }
+    if(!targetAnswer.votes.includes(data.votingUser)) {
+      targetAnswer.votes.push(data.votingUser);
+      io.to(this.room).emit('votesUpdated', this.gameState.roundInfo.categories);
+    }
 
     let user = this.findUserByUsername(data.votedUser);
     if(user) {
