@@ -504,10 +504,12 @@ function changeVisibility(element, visible) {
 
   if(visible) {
     element.removeClass('hidden');
-    element.addClass('animate-show');
+    playCssAnimation(element, 'animate-show');
+    //element.addClass('animate-show');
   } else {
     element.addClass('hidden');
-    element.removeClass('animate-show');
+    // playCssAnimation(element, 'animate-hide');
+    //element.removeClass('animate-show');
   }
 }
 
@@ -520,6 +522,17 @@ function handleEnterKey(textInput, f) {
   });
 }
 
+function playCssAnimation(targetElement, animationCssClass) {
+  if(targetElement.hasClass(animationCssClass)) {
+    targetElement.removeClass(animationCssClass);
+    void targetElement.offsetWidth;
+    setTimeout(()=>{
+      targetElement.addClass(animationCssClass);
+    }, 100);
+  } else {
+    targetElement.addClass(animationCssClass);
+  }
+}
 
 function filteredText(text) {
   return String(text).replace(/\<.*?\>/, '');
