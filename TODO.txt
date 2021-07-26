@@ -19,12 +19,13 @@ respostas preenchidas
 
 --x--
 
+- Contador regressivo quando vai começar com instruções
 - Fase de mostrar resultados/votos mostra uma frase por vez
+- Mostrar contador de usuários online agora
 - Botão de "like" ou "voto" com ícone
 - Diferenciar *melhor* de *menção honrosa*
 - Visual
 - Animação de frase entrando/saindo/sendo escrita
-- Contador regressivo quando vai começar
 - Apenas host com controle da sala para começar
 - Tempo pode ser personalizado, ou infinito
 - Timer leva em consideração horário inicial

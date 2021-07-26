@@ -258,6 +258,7 @@
         background-color: #181818;
         color:#ddd;
         font-family: Tahoma, sans-serif;
+        overflow-y: scroll;
       }
       h1, h2 {
         font-family: 'Zilla Slab', Tahoma, sans-serif;
@@ -278,12 +279,27 @@
       #game-round-container {
         font-size:100%;
         font-weight: bold;
+        cursor: default;
+      }
+      #starting-round {
+        font-weight: bold;
+        margin:0 5em;
+        text-align: center;
+        cursor: default;
+      }
+      #letter-big {
+        font-weight: bold;
+        font-family: 'Zilla Slab', serif;
+        font-size: 6em;
+        margin: 0 auto;
+        cursor: default;
       }
       #game-round-container p {
         margin:0.25em 0;
       }
       #current-category {
-        padding:1em 0;
+        padding: 0.5em 0;
+        cursor: default;
       }
       .category {
         margin:0.5em 0;
@@ -383,6 +399,11 @@
 
       <div id='container-body' class='w3-panel'>
         <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar →</button>
+        <div id='starting-round' class='hidden'>
+          <p>Prepare-se! Começando...</p>
+          <p>Complete os espaços em branco com expressões que iniciem com a letra<span id='letter-in-instructions'>...</span></p>
+          <p id='letter-big'>_</p>
+        </div>
         <div id='game-round-container'>
           <p>[Letra: <span id='random-letter'>_</span>] [Tempo: <span id='timer'>_</span>]</p>
           <div id='categories-container'>

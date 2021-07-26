@@ -56,7 +56,9 @@ function handleConnection(socket) {
       rooms[filteredRoomName].handleChatMessage(d, socket);
     });
     socket.to(filteredRoomName).on('disconnect', (reason)=>{
-      rooms[filteredRoomName].handleDisconnection(reason, socket);
+      if(rooms[filteredRoomName]) {
+        rooms[filteredRoomName].handleDisconnection(reason, socket);
+      }
     });
 
     io.to(socket.id).emit('userJoinedGame', {
@@ -143,7 +145,8 @@ function Room(room) {
 
     let alphabet = 'AAABBBCCCDDDEEEFFFGGGHIIIJJJKLLLMMMNNNOOOPPPQQRRRSSSTTTUUUVVWXYZ';
     let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
-    let totalTime = 100;
+    let gettingReadyExtraTime = 5;
+    let totalTime = 100 + gettingReadyExtraTime;
     let activeCategoriesThisRound = this.getCategoriesForThisRound(5);
 
     this.gameState.roundInfo = {

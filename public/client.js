@@ -18,11 +18,15 @@ let joinData = {
 
 let startButton, restartButton;
 
+let activeUsernamesContainer;
 let activeUsernamesListContainer;
 
 let gameRoundContainer;
+let startingRoundContainer;
 let resultsContainer;
 let randomLetterSlot;
+let randomLetterSlotBig;
+// let randomLetterSlotInStartingRound;
 let timerSlot;
 let categoriesContainer;
 let currentCategoryContainer;
@@ -86,11 +90,15 @@ function initializeHtmlElements() {
   startButton = select('#start-button').mousePressed(startGame);
   restartButton = select('#restart-button').mousePressed(startGame);
 
+  activeUsernamesContainer = select('#usernames-list-container');
   activeUsernamesListContainer = select('#usernames-list');
 
   gameRoundContainer = select('#game-round-container');
+  startingRoundContainer = select('#starting-round');
   resultsContainer = select('#results-container');
   randomLetterSlot = select('#random-letter');
+  randomLetterSlotBig = select('#letter-big');
+  // randomLetterSlotInStartingRound = select('#letter-in-instructions');
   timerSlot = select('#timer');
   categoriesContainer = select('#categories-container');
   currentCategoryContainer = select('#current-category');
@@ -246,7 +254,7 @@ function updateTimer() {
 
 function initializeGame(data) {
   let roundInfo = data;
-  randomLetterSlot.html(roundInfo.randomLetter);
+  updateCurrentLetter(roundInfo.randomLetter);
 
   categoriesList = [];
   for(let i = 0; i < roundInfo.categories.length; i++) {
@@ -260,7 +268,34 @@ function initializeGame(data) {
 
   initializeTimer(data.totalTime);
 
-  changeScreenStateTo('GAME_PLAYING');
+  changeScreenStateTo('STARTING_GAME');
+  setTimeout(()=>{
+    changeScreenStateTo('GAME_PLAYING');
+  }, 5000);
+}
+
+function playSelectingRandomLetterAnimation(targetLetter) {
+  let alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let targetLetterIndex = alphabet.indexOf(targetLetter);
+  if(targetLetterIndex < 0) {
+    //Error
+    return;
+  }
+  let currentIndex = ((targetLetterIndex - 10) + alphabet.length) % alphabet.length;
+  randomLetterSlotBig.html(alphabet[currentIndex]);
+  let animationInterval = setInterval(()=>{
+    currentIndex = (currentIndex + 1) % alphabet.length;
+    randomLetterSlotBig.html(alphabet[currentIndex]);
+    if(currentIndex == targetLetterIndex) {
+      clearInterval(animationInterval);
+    }
+  }, 100);
+}
+
+function updateCurrentLetter(letter) {
+  randomLetterSlot.html(letter);
+  // randomLetterSlotInStartingRound.html(letter);
+  playSelectingRandomLetterAnimation(letter);
 }
 
 function updateCurrentCategoryDisplayed(index) {
@@ -466,7 +501,9 @@ function getAllElements() {
     waitingEndFeedbackMessage,
     resultsContainer,
     chat.container,
-    suggestions.container
+    suggestions.container,
+    startingRoundContainer,
+    activeUsernamesContainer
   ];
 }
 
@@ -476,13 +513,16 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([header, footer, containerLogin]);
   }
   if(newState == 'LOBBY') {
-    activateOnlyActiveElements([header, footer, containerBody, startButton, chat.container, suggestions.container]);
+    activateOnlyActiveElements([header, footer, containerBody, startButton, chat.container, suggestions.container, activeUsernamesContainer]);
+  }
+  if(newState == 'STARTING_GAME') {
+    activateOnlyActiveElements([startingRoundContainer, containerBody, activeUsernamesContainer]);
   }
   if(newState == 'GAME_PLAYING') {
-    activateOnlyActiveElements([gameRoundContainer, categoriesContainer, containerBody]);
+    activateOnlyActiveElements([gameRoundContainer, categoriesContainer, containerBody, activeUsernamesContainer]);
   }
   if(newState == 'RESULTS') {
-    activateOnlyActiveElements([header, footer, containerBody, restartButton, resultsContainer, chat.container, suggestions.container]);
+    activateOnlyActiveElements([header, footer, containerBody, restartButton, resultsContainer, chat.container, suggestions.container, activeUsernamesContainer]);
   }
 }
 
