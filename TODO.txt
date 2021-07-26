@@ -16,10 +16,11 @@ respostas preenchidas
 - Servidor sabe quando todos já terminaram
 - Outros jogadores podem avaliar respostas
 - Mostrar campo para completar no meio da frase
+- Contador regressivo quando vai começar com instruções
 
 --x--
 
-- Contador regressivo quando vai começar com instruções
+- Loading quando vc tenta acessar as coisas
 - Fase de mostrar resultados/votos mostra uma frase por vez
 - Mostrar contador de usuários online agora
 - Botão de "like" ou "voto" com ícone
