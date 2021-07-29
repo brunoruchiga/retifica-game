@@ -4,6 +4,7 @@ const HOST = location.origin.replace(/^http/, 'ws')
 let socket;
 
 let mainContainer;
+let containerStart;
 let containerLogin;
 let containerBody;
 let header;
@@ -15,6 +16,7 @@ let joinData = {
   usernameTextInput: undefined,
   confirmButton: undefined
 }
+let createRoomButton, joinFriendRoomButton;
 
 let startButton, restartButton;
 
@@ -69,11 +71,11 @@ function setup() {
   categoriesList = [];
 
   changeVisibility(mainContainer, true);
-  changeScreenStateTo('START_SCREEN');
 }
 
 function initializeHtmlElements() {
   mainContainer = select('#main-container');
+  containerStart = select('#container-start')
   containerLogin = select('#container-login');
   containerBody = select('#container-body');
   header = select('#header');
@@ -81,14 +83,17 @@ function initializeHtmlElements() {
 
   joinData.roomTextInput = select('#room-input').input(validateRoomOnInput);
   joinData.usernameTextInput = select('#username-input').input(validateUsernameOnInput);
-  joinData.confirmButton = select('#join-button').mousePressed(requestToJoinRoom);
+  joinData.confirmButton = select('#join-button').elt.addEventListener('click', requestToJoinRoom);
   handleEnterKey(joinData.roomTextInput, ()=>{
     joinData.usernameTextInput.elt.focus();
   });
   handleEnterKey(joinData.usernameTextInput, requestToJoinRoom);
 
-  startButton = select('#start-button').mousePressed(startGame);
-  restartButton = select('#restart-button').mousePressed(startGame);
+  createRoomButton = select('#create-room-button').elt.addEventListener('click', goToCreateRoomScreen); //mousePressed(goToCreateRoomScreen);
+  joinFriendRoomButton = select('#join-friend-room-button').elt.addEventListener('click', goToJoinRoomScreen);
+
+  startButton = select('#start-button').elt.addEventListener('click', startGame);
+  restartButton = select('#restart-button').elt.addEventListener('click', startGame);
 
   activeUsernamesContainer = select('#usernames-list-container');
   activeUsernamesListContainer = select('#usernames-list');
@@ -106,19 +111,19 @@ function initializeHtmlElements() {
   categoryAnswerSlotInSentencePre = select('#answer-slot-in-sentence-pre');
   categoryAnswerSlotInSentencePos = select('#answer-slot-in-sentence-pos');
   categoryTextInput = select('#category-input').input(updateAnswerOnInput);
-  confirmCategoryButton = select('#confirm-category').mousePressed(confirmCategory);
+  confirmCategoryButton = select('#confirm-category').elt.addEventListener('click', confirmCategory);
   handleEnterKey(categoryTextInput, confirmCategory);
   waitingEndFeedbackMessage = select('#waiting-end');
 
   chat.container = select('#chat-container');
   chat.messageInput = select('#chat-message-input');
-  chat.sendButton = select('#send-message-button').mousePressed(handleSendMessageButtonClicked);
+  chat.sendButton = select('#send-message-button').elt.addEventListener('click', handleSendMessageButtonClicked);
   handleEnterKey(chat.messageInput, handleSendMessageButtonClicked);
   chat.messagesContainer = select('#messages-container');
 
   suggestions.container = select('#suggestions-container');
   suggestions.textInput = select('#suggestion-input');
-  suggestions.confirmButton = select('#confirm-suggestion').mousePressed(sendSuggestion);
+  suggestions.confirmButton = select('#confirm-suggestion').elt.addEventListener('click', sendSuggestion);
   handleEnterKey(suggestions.textInput, sendSuggestion);
   suggestions.feedbackMessage = select('#confirmed-suggestion');
 
@@ -126,15 +131,39 @@ function initializeHtmlElements() {
   warningMessageSlot = select('#warning-message');
 }
 
+function goToCreateRoomScreen() {
+  changeScreenStateTo('JOIN_ROOM_SCREEN');
+  setTimeout(()=> {
+    joinData.roomTextInput.elt.focus();
+  }, 1);
+}
+
+function goToJoinRoomScreen() {
+  changeScreenStateTo('JOIN_ROOM_SCREEN');
+  joinData.roomTextInput.value('');
+  setTimeout(()=> {
+    joinData.roomTextInput.elt.focus();
+  }, 1);
+}
+
 function initializeRoom() {
-  let initialRoomName;
   if(location.hash != '') {
-    initialRoomName = location.hash.substring(1);
+    updateRoomNameFromURLHash();
+    changeScreenStateTo('JOIN_ROOM_SCREEN');
+    joinData.usernameTextInput.elt.focus();
   } else {
-    initialRoomName = 'room' + nf(floor(random(0,10000)),4,0);
+    let randomRoomName = 'room' + nf(floor(random(0,10000)),4,0);
+    joinData.roomTextInput.value(randomRoomName);
+    changeScreenStateTo('START_SCREEN');
+    joinData.roomTextInput.elt.focus();
   }
+}
+
+function updateRoomNameFromURLHash() {
+  let initialRoomName = location.hash.substring(1);
   joinData.roomTextInput.value(initialRoomName);
 }
+window.onhashchange = updateRoomNameFromURLHash;
 
 function validateRoomOnInput() {
   let filteredRoom = joinData.roomTextInput.value().replace(/[^a-zA-Z0-9_]/ig, '');
@@ -142,7 +171,7 @@ function validateRoomOnInput() {
 }
 
 function initializeRandomUsername() {
-  username = 'user' + nf(floor(random(0,1000000)),6,0);
+  username = 'usuario' + nf(floor(random(0,1000000)),6,0);
   joinData.usernameTextInput.value(username);
 }
 
@@ -397,7 +426,7 @@ function presentAllAnswers(data) {
 function createFormatedAnswerInParent(sentence, answer, categoryIndex, answerUser, votes, targetParent) {
   //Button
   let sentenceButton = createButton('').addClass('w3-btn').addClass('container-button').parent(targetParent);
-  sentenceButton.mousePressed(()=>{
+  sentenceButton.elt.addEventListener('click', ()=>{
     voteFor(categoryIndex, answerUser);
   });
 
@@ -475,7 +504,7 @@ function sendSuggestion() {
 function handleDisconnection(data) {
   socket.disconnect();
   displayWarning("Você foi desconectado: " + data);
-  changeScreenStateTo('START_SCREEN');
+  changeScreenStateTo('JOIN_ROOM_SCREEN');
 }
 
 function displayWarning(warningMessage) {
@@ -492,6 +521,7 @@ function getAllElements() {
   return [
     header,
     footer,
+    containerStart,
     containerLogin,
     containerBody,
     startButton,
@@ -509,6 +539,9 @@ function getAllElements() {
 
 function changeScreenStateTo(newState) {
   if(newState == 'START_SCREEN') {
+    activateOnlyActiveElements([header, footer, containerStart]);
+  }
+  if(newState == 'JOIN_ROOM_SCREEN') {
     joinData.usernameTextInput.value(username);
     activateOnlyActiveElements([header, footer, containerLogin]);
   }
@@ -537,6 +570,9 @@ function activateOnlyActiveElements(activeElements) {
 ///////////////////////////
 //Utils
 function changeVisibility(element, visible) {
+  if(!element) {
+    return;
+  }
   let prevVisible = !element.hasClass('hidden');
   if(prevVisible == visible) {
     return;

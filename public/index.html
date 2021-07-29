@@ -277,6 +277,10 @@
         padding: 0 0.5em;
         margin: 0 auto;
       }
+      .form-label {
+        font-size: 0.8em;
+        margin:0;
+      }
       #game-round-container {
         font-size:100%;
         font-weight: bold;
@@ -392,15 +396,20 @@
       </div>
 
       <div id='header' class='w3-panel'>
-        <h1>[RETIFICADO]</h1>
-        <!-- <p><strong>Preencha os espaços em branco</strong></p> -->
+        <h1 style='margin-left:-0.1em;'>[RETIFICADO]</h1>
+        <h2 style="font-size:1.2em; margin-top: -0.5em;">Um jogo sobre <span style='background-color:#000; padding:0 0.2em;'>completar as frases</span></h2>
       </div>
 
-      <div id='container-login' class='w3-panel'>
-        <!-- <p>Escolha seu nome de usuário:</p> -->
-        <input type='text' id='room-input' class='w3-input w3-black' maxlength='20' autofocus/>
-        <input type='text' id='username-input' class='w3-input w3-black' maxlength='20'/>
-        <button id='join-button' class='w3-btn w3-black'>Entrar</button>
+      <div id='container-start' class='w3-panel w3-padding-16'>
+        <button id='create-room-button' class='w3-btn w3-black w3-block	w3-left-align' style='margin-bottom:0.2em;'>Criar nova sala</button>
+        <button id='join-friend-room-button' class='w3-btn w3-black w3-block w3-left-align' style='margin-bottom:0.2em;'>Entrar em sala existente</button>
+      </div>
+      <div id='container-login' class='w3-panel w3-padding-16'>
+        <p class='form-label'>Código da sala</p>
+        <input type='text' id='room-input' class='w3-input w3-black' maxlength='20' style='margin-bottom: 1em;'/>
+        <p class='form-label'>Nome</p>
+        <input type='text' id='username-input' class='w3-input w3-black' maxlength='20' style='margin-bottom: 1em;'/>
+        <button id='join-button' class='w3-btn w3-black w3-large' style='padding: 0.5em 2em;'>Entrar</button>
       </div>
 
       <div id='container-body' class='w3-panel'>
@@ -443,7 +452,7 @@
         </div>
       </div>
 
-      <div id='footer' class='w3-container w3-tiny'>
+      <div id='footer' class='w3-container w3-tiny w3-section'>
         <p>Criado por <a href='http://brunoruchiga.com/'>Bruno Ruchiga</a>. Versão Alpha. 2021.</p>
         <p>Classificação Indicativa: Não recomendado para menores de 18 anos. Linguagem potencialmente ofensiva para alguns públicos.</p>
         <p>

@@ -34,3 +34,4 @@ respostas preenchidas
 - Lista de temas personalizada
 - Fazer uma resposta aleatório (sortear de outra categoria)
 - Ter versão family-friendly
+- "Hide room name" for streamers
