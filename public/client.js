@@ -11,11 +11,13 @@ let header;
 let footer;
 
 let username;
+let roomName;
 let joinData = {
   roomTextInput: undefined,
   usernameTextInput: undefined,
   confirmButton: undefined
 }
+let roomNameDisplay;
 let createRoomButton, joinFriendRoomButton;
 
 let startButton, restartButton;
@@ -88,12 +90,15 @@ function initializeHtmlElements() {
     joinData.usernameTextInput.elt.focus();
   });
   handleEnterKey(joinData.usernameTextInput, requestToJoinRoom);
+  roomNameDisplay = select('#room-name');
 
   createRoomButton = select('#create-room-button').elt.addEventListener('click', goToCreateRoomScreen); //mousePressed(goToCreateRoomScreen);
   joinFriendRoomButton = select('#join-friend-room-button').elt.addEventListener('click', goToJoinRoomScreen);
 
-  startButton = select('#start-button').elt.addEventListener('click', startGame);
-  restartButton = select('#restart-button').elt.addEventListener('click', startGame);
+  startButton = select('#start-button');
+  startButton.elt.addEventListener('click', startGame);
+  restartButton = select('#restart-button');
+  restartButton.elt.addEventListener('click', startGame);
 
   activeUsernamesContainer = select('#usernames-list-container');
   activeUsernamesListContainer = select('#usernames-list');
@@ -184,7 +189,7 @@ function requestToJoinRoom() {
   if(joinData.roomTextInput.value() == '') {
     return;
   }
-  let roomName = joinData.roomTextInput.value().toLowerCase();
+  roomName = joinData.roomTextInput.value().toLowerCase();
   if(joinData.usernameTextInput.value() == '') {
     return;
   }
@@ -212,7 +217,7 @@ function handleNewSocketConnection(data) {
   if(joinData.roomTextInput.value() == '') {
     return;
   }
-  let roomName = joinData.roomTextInput.value().toLowerCase();
+  roomName = joinData.roomTextInput.value().toLowerCase();
   if(joinData.usernameTextInput.value() == '') {
     return;
   }
@@ -239,8 +244,10 @@ function handleUserJoinedGame(data) {
   if (gameState.state == 'results') {
     changeScreenStateTo('RESULTS');
   }
-  console.log('User joined room ' + data.room);
-  history.pushState(null, null, '#'+data.room);
+  let roomNameFiltered = filteredText(data.room);
+  console.log('User joined room ' + roomNameFiltered);
+  roomNameDisplay.html(roomNameFiltered);
+  history.pushState(null, null, '#'+roomNameFiltered);
 }
 
 function handleActiveUsersListUpdated(data) {
@@ -571,6 +578,7 @@ function activateOnlyActiveElements(activeElements) {
 //Utils
 function changeVisibility(element, visible) {
   if(!element) {
+    console.error(element, visible);
     return;
   }
   let prevVisible = !element.hasClass('hidden');

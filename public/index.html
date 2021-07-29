@@ -254,11 +254,13 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@600;700&display=swap');
 
+      html {
+        overflow-y: scroll;
+      }
       body {
         background-color: #181818;
         color:#ddd;
         font-family: Tahoma, sans-serif;
-        overflow-y: scroll;
       }
       h1, h2 {
         font-family: 'Zilla Slab', Tahoma, sans-serif;
@@ -266,16 +268,22 @@
         cursor:default;
       }
       .container {
-        border:2px solid #ccc;
+        border:2px solid #bbb;
         padding:0 1em 1em 1em;
         margin:2em 0;
         min-height:2em;
-        border-radius: 2px;
+        border-radius: 3px;
+      }
+      #outer-container {
+        margin: 0 auto;
+        box-shadow:0 8px 64px 0 rgb(0 0 0 / 20%), 0 6px 80px 0 rgb(0 0 0 / 15%);
+        max-width: 1040px;
+        min-height: 99vh;
       }
       #main-container {
-        max-width: 600px;
-        padding: 0 0.5em;
         margin: 0 auto;
+        max-width: 600px;
+        padding:0.5em 0.5em 2em;
       }
       .form-label {
         font-size: 0.8em;
@@ -389,77 +397,80 @@
   </head>
 
   <body>
-    <div id='main-container' class='hidden'>
+    <div id='outer-container'>
+      <div id='main-container' class='hidden'>
 
-      <div id='warnings' class='w3-panel w3-pale-yellow' style='cursor:pointer;' onclick="changeVisibility(warningContainer, false)" >
-        <p id='warning-message'>...</p>
-      </div>
-
-      <div id='header' class='w3-panel'>
-        <h1 style='margin-left:-0.1em;'>[RETIFICADO]</h1>
-        <h2 style="font-size:1.2em; margin-top: -0.5em;">Um jogo sobre <span style='background-color:#000; padding:0 0.2em;'>completar as frases</span></h2>
-      </div>
-
-      <div id='container-start' class='w3-panel w3-padding-16'>
-        <button id='create-room-button' class='w3-btn w3-black w3-block	w3-left-align' style='margin-bottom:0.2em;'>Criar nova sala</button>
-        <button id='join-friend-room-button' class='w3-btn w3-black w3-block w3-left-align' style='margin-bottom:0.2em;'>Entrar em sala existente</button>
-      </div>
-      <div id='container-login' class='w3-panel w3-padding-16'>
-        <p class='form-label'>Código da sala</p>
-        <input type='text' id='room-input' class='w3-input w3-black' maxlength='20' style='margin-bottom: 1em;'/>
-        <p class='form-label'>Nome</p>
-        <input type='text' id='username-input' class='w3-input w3-black' maxlength='20' style='margin-bottom: 1em;'/>
-        <button id='join-button' class='w3-btn w3-black w3-large' style='padding: 0.5em 2em;'>Entrar</button>
-      </div>
-
-      <div id='container-body' class='w3-panel'>
-        <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar →</button>
-        <div id='starting-round' class='hidden'>
-          <p>Prepare-se! Começando...</p>
-          <p>Complete os espaços em branco com expressões que iniciem com a letra<span id='letter-in-instructions'>...</span></p>
-          <p id='letter-big'>_</p>
+        <div id='warnings' class='w3-panel w3-pale-yellow' style='cursor:pointer;' onclick="changeVisibility(warningContainer, false)" >
+          <p id='warning-message'>...</p>
         </div>
-        <div id='game-round-container'>
-          <p>[Letra: <span id='random-letter'>_</span>] [Tempo: <span id='timer'>_</span>]</p>
-          <div id='categories-container'>
-            <p id='current-category' class='category'>
-              <span id='answer-slot-in-sentence-pre' class='current-category-text'>Este é um teste de </span>
-              <span id='answer-slot-in-sentence' class='w3-black current-category-text category-answer'>slot no meio da frase</span>
-              <span id='answer-slot-in-sentence-pos' class='current-category-text'> para ver como fica.</span>
-            </p>
-            <input type='text' id='category-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
-            <button id='confirm-category' class='w3-btn w3-black'>Retificado!</button>
+
+        <div id='header' class='w3-panel'>
+          <h1 style='margin-left:-0.1em;'>[RETIFICADO]</h1>
+          <h2 style="font-size:1.2em; line-height: 1.25;">Um jogo sobre <span style='background-color:#000; padding:0 0.2em;'>completar as frases</span><br>com a letra correta</h2>
+        </div>
+
+        <div id='container-start' class='w3-panel w3-padding-16'>
+          <button id='create-room-button' class='w3-btn w3-black w3-block	w3-left-align' style='margin-bottom:0.2em;'>Criar nova sala</button>
+          <button id='join-friend-room-button' class='w3-btn w3-black w3-block w3-left-align' style='margin-bottom:0.2em;'>Entrar em sala existente</button>
+        </div>
+        <div id='container-login' class='w3-panel w3-padding-16'>
+          <p class='form-label'>Código da sala</p>
+          <input type='text' id='room-input' class='w3-input w3-black' maxlength='20' style='margin-bottom: 1em;'/>
+          <p class='form-label'>Nome</p>
+          <input type='text' id='username-input' class='w3-input w3-black' maxlength='20' style='margin-bottom: 1em;'/>
+          <button id='join-button' class='w3-btn w3-black w3-large' style='padding: 0.5em 2em;'>Entrar</button>
+        </div>
+
+        <div id='container-body' class='w3-panel w3-padding-16'>
+          <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar →</button>
+          <div id='starting-round' class='hidden'>
+            <p>Prepare-se! Começando...</p>
+            <p>Complete os espaços em branco com expressões que iniciem com a letra<span id='letter-in-instructions'>...</span></p>
+            <p id='letter-big'>_</p>
           </div>
-          <div id='waiting-end' class='hidden'><p>Aguardando fim do jogo...</p></div>
+          <div id='game-round-container'>
+            <p>[Letra: <span id='random-letter'>_</span>] [Tempo: <span id='timer'>_</span>]</p>
+            <div id='categories-container'>
+              <p id='current-category' class='category'>
+                <span id='answer-slot-in-sentence-pre' class='current-category-text'>Este é um teste de </span>
+                <span id='answer-slot-in-sentence' class='w3-black current-category-text category-answer'>slot no meio da frase</span>
+                <span id='answer-slot-in-sentence-pos' class='current-category-text'> para ver como fica.</span>
+              </p>
+              <div class='w3-row'>
+                <input type='text' id='category-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/> <button id='confirm-category' class='w3-btn w3-black w3-right'>→</button>
+              </div>
+            </div>
+            <div id='waiting-end' class='hidden'><p>Aguardando fim do jogo...</p></div>
+          </div>
+          <div id='results-container' class='container'></div>
+          <div id='usernames-list-container' class='container'>
+            <p style='margin-bottom:0;'><strong>Sala: <span id='room-name'>_</span></strong></p>
+            <ul id='usernames-list' class='w3-ul'></ul>
+          </div>
+          <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Nova rodada →</button>
+          <div id='chat-container' class='container w3-small'>
+            <p><strong>Chat:</strong></p>
+            <div id='messages-container' class='container'></div>
+            <input type='text' id='chat-message-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
+            <button id='send-message-button' class='w3-btn w3-black'>Enviar</button>
+          </div>
+          <div id='suggestions-container' class='container w3-small'>
+            <p><strong>Escreva sua sugestão de frase para o jogo:</strong></p>
+            <input type='text' id='suggestion-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
+            <button id='confirm-suggestion' class='w3-btn w3-black'>Enviar sugestão</button>
+            <div id='confirmed-suggestion' class='w3-panel w3-green hidden'><p>Enviado!</p></div>
+          </div>
         </div>
-        <div id='results-container' class='container'></div>
-        <div id='usernames-list-container' class='container w3-small'>
-          <p style='margin-bottom:0;'><strong>Quadro de pontuação:</strong></p>
-          <ul id='usernames-list' class='w3-ul'></ul>
-        </div>
-        <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Novo jogo ↺</button>
-        <div id='chat-container' class='container w3-small'>
-          <p><strong>Chat:</strong></p>
-          <div id='messages-container' class='container'></div>
-          <input type='text' id='chat-message-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
-          <button id='send-message-button' class='w3-btn w3-black'>Enviar</button>
-        </div>
-        <div id='suggestions-container' class='container w3-small'>
-          <p><strong>Escreva sua sugestão de frase para o jogo:</strong></p>
-          <input type='text' id='suggestion-input' class='w3-input w3-black' maxlength='240' autocomplete="off"/>
-          <button id='confirm-suggestion' class='w3-btn w3-black'>Enviar sugestão</button>
-          <div id='confirmed-suggestion' class='w3-panel w3-green hidden'><p>Enviado!</p></div>
-        </div>
-      </div>
 
-      <div id='footer' class='w3-container w3-tiny w3-section'>
-        <p>Criado por <a href='http://brunoruchiga.com/'>Bruno Ruchiga</a>. Versão Alpha. 2021.</p>
-        <p>Classificação Indicativa: Não recomendado para menores de 18 anos. Linguagem potencialmente ofensiva para alguns públicos.</p>
-        <p>
-          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licença Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a><br />Licença <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Atribuição-NãoComercial-CompartilhaIgual 4.0 Internacional</a>.
-          <br>Algumas das frases baseadas no jogo <a href="https://cardsagainsthumanity.com/">Cards Against Humanity</a>, sob a licença Creative Commons BY-NC-SA 2.0.
-          <br>Respostas enviadas são coletadas e armazenadas apenas anonimamente, sem vinculação com nome de usuário.
-        </p>
+        <div id='footer' class='w3-container w3-tiny w3-section'>
+          <p>Criado por <a href='http://brunoruchiga.com/'>Bruno Ruchiga</a>. Versão Alpha. 2021.</p>
+          <p>Classificação Indicativa: Não recomendado para menores de 18 anos. Linguagem potencialmente ofensiva para alguns públicos.</p>
+          <p>
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licença Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a><br />Licença <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Atribuição-NãoComercial-CompartilhaIgual 4.0 Internacional</a>.
+            <br>Algumas das frases baseadas no jogo <a href="https://cardsagainsthumanity.com/">Cards Against Humanity</a>, sob a licença Creative Commons BY-NC-SA 2.0.
+            <br>Respostas enviadas são coletadas e armazenadas apenas anonimamente, sem vinculação com nome de usuário.
+          </p>
+        </div>
       </div>
     </div>
   </body>
