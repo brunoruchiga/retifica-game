@@ -256,15 +256,19 @@ function handleUserJoinedGame(data) {
 
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
-  for(let i = 0; i < data.length; i++) {
+  let sortedUserList = data.sort(scoreCompareFunction);
+  for(let i = 0; i < sortedUserList.length; i++) {
     let text;
-    if(data[i].score > 0) {
-      text = data[i].username + ' ★'+data[i].score;
+    if(sortedUserList[i].score > 0) {
+      text = sortedUserList[i].username + ' ✔'+sortedUserList[i].score;
     } else {
-      text = data[i].username;
+      text = sortedUserList[i].username;
     }
     createElement('li', text).addClass('w3-padding-small').parent(activeUsernamesListContainer);
   }
+}
+function scoreCompareFunction(a, b) {
+  return b.score - a.score;
 }
 
 function startGame() {
