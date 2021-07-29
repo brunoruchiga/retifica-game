@@ -456,7 +456,6 @@ let questions = [
   'Artista ruim',
   'Eu reprovei na prova de ___',
   '___: Nova série original GloboPlay',
-  'Quando a pandemia abacar, eu vou ___ muito',
   'Esta é uma manifestação muito importante para conscientizar toda a sociedade sobre o problema com ___',
   'Essa cicatriz aqui na perna foi causada por ___',
   'Fátima, é um prazer estar aqui no seu programa para poder falar sobre ___',
