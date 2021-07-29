@@ -340,6 +340,7 @@ function Room(room) {
 
 let isEdittingArchiveAnswersFile = false;
 function archiveAnswers(newAnswers) {
+  return;
   if(isEdittingArchiveAnswersFile) {
     //Is file is being written, try again 1s after and abort this function
     setTimeout(()=>{archiveAnswers(newAnswers)}, 100);
@@ -374,6 +375,7 @@ function archiveAnswers(newAnswers) {
 
 let isEdittingSuggestionFile = false;
 function addSuggestion(text) {
+  return;
   let filteredSuggestion = filteredText(text);
   if(isEdittingSuggestionFile) {
     //Is file is being written, try again 1s after and abort this function
