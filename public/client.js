@@ -463,9 +463,9 @@ function createFormatedAnswerInParent(sentence, answer, categoryIndex, answerUse
     let answersContainer = createDiv('').parent(targetParent);
     for(let i = 0; i < votes.length; i++) {
       // createDiv('★ '+votes[i]).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-tiny').parent(answersContainer);
-      createDiv('★').addClass('vote-from').parent(answersContainer);
+      createDiv('✔').addClass('vote-from').parent(answersContainer);
     }
-    // createDiv('★ '+votes.length).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-small').parent(answersContainer);
+    // createDiv('✔ '+votes.length).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-small').parent(answersContainer);
   }
 }
 
@@ -475,9 +475,9 @@ function voteFor(categoryIndex, answerUser) {
     categoryIndex: categoryIndex,
     votedUser: answerUser
   }
-  if(answerUser == username) {
-    return;
-  }
+  // if(answerUser == username) {
+  //   return;
+  // }
   socket.emit('sendVote', vote);
 }
 

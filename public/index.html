@@ -262,6 +262,7 @@
         background-color: #181818;
         color:#ddd;
         font-family: Tahoma, sans-serif;
+        cursor: default;
       }
       h1, h2 {
         font-family: 'Zilla Slab', Tahoma, sans-serif;
@@ -328,8 +329,8 @@
         font-weight: normal;
       }
       #results-container hr {
-        width:75%;
-        margin: 3em 0;
+        margin: 4em 0;
+        border-bottom: 1px solid;
       }
       .result-category {
         color: #bbb;
@@ -349,7 +350,7 @@
       }
       .container-button:hover {
         box-shadow: 0 0;
-        background-color:#333;
+        /* background-color:#333; */
       }
       .container-button p {
         margin:0;
@@ -357,11 +358,14 @@
         font-size: 1.25em;
       }
       .vote-from {
-        padding:2px 8px;
-        margin:-8px 4px 4px 0;
+        margin:0;
+        padding:0;
         display:inline-block;
+        position: relative;
+        top: -8px;
         border-radius: 10px;
         cursor: default;
+        color: #fff;
       }
       #messages-container {
         height:140px;
