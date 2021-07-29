@@ -8,6 +8,7 @@ let containerStart;
 let containerLogin;
 let containerBody;
 let header;
+let headerTagline;
 let footer;
 
 let username;
@@ -28,6 +29,7 @@ let activeUsernamesListContainer;
 let gameRoundContainer;
 let startingRoundContainer;
 let resultsContainer;
+let resultsSentenceContainer;
 let randomLetterSlot;
 let randomLetterSlotBig;
 // let randomLetterSlotInStartingRound;
@@ -80,6 +82,7 @@ function initializeHtmlElements() {
   containerStart = select('#container-start')
   containerLogin = select('#container-login');
   containerBody = select('#container-body');
+  headerTagline = select('#tagline');
   header = select('#header');
   footer = select('#footer');
 
@@ -106,6 +109,7 @@ function initializeHtmlElements() {
   gameRoundContainer = select('#game-round-container');
   startingRoundContainer = select('#starting-round');
   resultsContainer = select('#results-container');
+  resultsSentenceContainer = select('#results-sentence-container');
   randomLetterSlot = select('#random-letter');
   randomLetterSlotBig = select('#letter-big');
   // randomLetterSlotInStartingRound = select('#letter-in-instructions');
@@ -394,6 +398,9 @@ function confirmCategory() {
       break;
     }
   }
+  setTimeout(()=>{
+    categoryTextInput.elt.focus();
+  }, 1);
   if(allCategoriesConfirmed) {
     //Finished
     clearCurrentCategoryDisplayed();
@@ -410,8 +417,8 @@ function handleGameRoundEnded(data) {
 
 function presentAllAnswers(data) {
   console.log(data);
-  resultsContainer.html('');
-  createElement('hr').parent(resultsContainer);
+  resultsSentenceContainer.html('');
+  createElement('hr').parent(resultsSentenceContainer);
   for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
     answersUser = Object.keys(data[tempCategoryIndex].answers);
     if(answersUser.length > 0) { //If received answer from at least 1 user
@@ -422,10 +429,10 @@ function presentAllAnswers(data) {
           tempCategoryIndex,
           answersUser[i],
           data[tempCategoryIndex].answers[answersUser[i]].votes,
-          resultsContainer
+          resultsSentenceContainer
         );
       }
-      createElement('hr').parent(resultsContainer);
+      createElement('hr').parent(resultsSentenceContainer);
     }
   }
 }
@@ -527,6 +534,7 @@ function displayWarning(warningMessage) {
 function getAllElements() {
   return [
     header,
+    headerTagline,
     footer,
     containerStart,
     containerLogin,
@@ -546,14 +554,14 @@ function getAllElements() {
 
 function changeScreenStateTo(newState) {
   if(newState == 'START_SCREEN') {
-    activateOnlyActiveElements([header, footer, containerStart]);
+    activateOnlyActiveElements([header, headerTagline, footer, containerStart]);
   }
   if(newState == 'JOIN_ROOM_SCREEN') {
     joinData.usernameTextInput.value(username);
-    activateOnlyActiveElements([header, footer, containerLogin]);
+    activateOnlyActiveElements([header, headerTagline, footer, containerLogin]);
   }
   if(newState == 'LOBBY') {
-    activateOnlyActiveElements([header, footer, containerBody, startButton, chat.container, suggestions.container, activeUsernamesContainer]);
+    activateOnlyActiveElements([header, headerTagline, footer, containerBody, startButton, chat.container, suggestions.container, activeUsernamesContainer]);
   }
   if(newState == 'STARTING_GAME') {
     activateOnlyActiveElements([startingRoundContainer, containerBody, activeUsernamesContainer]);
@@ -578,7 +586,7 @@ function activateOnlyActiveElements(activeElements) {
 //Utils
 function changeVisibility(element, visible) {
   if(!element) {
-    console.error(element, visible);
+    console.error('Element invalid in changeVisibility function:', element, visible);
     return;
   }
   let prevVisible = !element.hasClass('hidden');

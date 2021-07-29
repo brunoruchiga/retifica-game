@@ -406,6 +406,10 @@ function addSuggestion(text) {
 
 function uploadFile(file, name, callback) {
   const fileStream = fs.createReadStream(file);
+  if(!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    console.error('Could not access env variables')
+    return;
+  }
   const s3 = new aws.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
