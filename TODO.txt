@@ -21,6 +21,7 @@ respostas preenchidas
 --x--
 
 - Loading quando vc tenta acessar as coisas
+- "Compartilhe o código/link de sua sala"
 - Fase de mostrar resultados/votos mostra uma frase por vez
 - Mostrar contador de usuários online agora
 - Botão de "like" ou "voto" com ícone
@@ -35,3 +36,5 @@ respostas preenchidas
 - Fazer uma resposta aleatório (sortear de outra categoria)
 - Ter versão family-friendly
 - "Hide room name" for streamers
+- Dono da sala poder skipar
+- Customizar letras
