@@ -1,15 +1,13 @@
-console.log('\n\n//////////////////////////////////////////')
-console.log('Server running')
-require('dotenv').config()
+console.log('\n\n//////////////////////////////////////////');
+console.log('Server running');
+require('dotenv').config();
 
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT);
 
-app.use(express.static('public',{
-  extensions:['json']
-}));
+app.use(express.static('public'));
 
 let socket = require('socket.io');
 let io = socket(server, {
@@ -22,55 +20,34 @@ const fs = require('fs');
 const aws = require('aws-sdk');
 aws.config.region = 'us-east-2';
 
-let globalClients = [];
 let rooms = {};
+let connectedUsersCounter = 0;
 
 function handleConnection(socket) {
   console.log('New connection: ' + socket.id);
   io.to(socket.id).emit('newSocketConnection');
+  connectedUsersCounter++;
 
-  globalClients.push(new Client(socket));
-
-  socket.on('requestToJoinRoom', joinNewUserToRoom);
+  socket.on('requestToJoinRoom', handleRequestToJoinRoom);
   socket.on('suggestionSent', addSuggestion);
 
-  function joinNewUserToRoom(data) {
-    filteredRoomName = filteredText(data.room).toLowerCase().replace(/[^a-zA-Z0-9_]/ig, '');
+  function handleRequestToJoinRoom(receivedData) {
+    let requestToJoinRoomData = receivedData;
 
-    if(!rooms[filteredRoomName]) {
-      rooms[filteredRoomName] = new Room(filteredRoomName);
+    let roomName = filteredText(requestToJoinRoomData.roomName).toLowerCase().replace(/[^a-zA-Z0-9_]/ig, '');
+    let username = filteredText(requestToJoinRoomData.username);
+
+    if(!rooms[roomName]) {
+      //If no room with this name, create new room
+      rooms[roomName] = new Room(roomName);
     }
-    socket.join(filteredRoomName);
-    rooms[filteredRoomName].handleRequestToJoinRoomByUsername(data.username, socket);
-
-    socket.to(filteredRoomName).on('requestNewGame', ()=>{
-      rooms[filteredRoomName].startNewGame();
-    });
-    socket.to(filteredRoomName).on('sendAnswer', (d)=>{
-      rooms[filteredRoomName].handleAnswerSent(d, socket);
-    });
-    socket.to(filteredRoomName).on('sendVote', (d)=>{
-      rooms[filteredRoomName].handleNewVote(d, socket);
-    });
-    socket.to(filteredRoomName).on('chatMessageSent', (d)=>{
-      rooms[filteredRoomName].handleChatMessage(d, socket);
-    });
-    socket.to(filteredRoomName).on('disconnect', (reason)=>{
-      if(rooms[filteredRoomName]) {
-        rooms[filteredRoomName].handleDisconnection(reason, socket);
-      }
-    });
-
-    io.to(socket.id).emit('userJoinedGame', {
-      room: filteredRoomName,
-      gameState:rooms[filteredRoomName].gameState
-    });
-    io.to(filteredRoomName).emit('activeUsersListUpdated', rooms[filteredRoomName].getListOfActiveUsernames());
+    socket.join(roomName);
+    rooms[roomName].joinUserToRoom(username, socket);
   }
 }
 
-function Client(socket) {
-  this.username = '';
+function User(socket, username) {
+  this.username = username;
   this.socket = socket;
   this.answers = [];
   this.score = 0;
@@ -83,78 +60,93 @@ function GameState() {
 };
 
 function Room(room) {
-  this.room = room;
-  this.clients = [];
+  this.roomName = room;
+  this.users = [];
   this.active = true;
   this.gameState  = new GameState();
   this.allQuestionsRandomized = getRandomizedQuestions();
 
-  this.handleRequestToJoinRoomByUsername = function(username, socket) {
-    let filteredUsername = filteredText(username);
+  this.joinUserToRoom = function(username, socket) {
+    let user = this.addUserByUsername(username, socket);
+
+    //Bind events
+    socket.to(this.roomName).on('requestNewRound', ()=>{
+      this.startNewRound();
+    });
+    socket.to(this.roomName).on('sendAnswer', (receivedData)=>{
+      this.handleAnswerSent(receivedData, socket);
+    });
+    socket.to(this.roomName).on('sendVote', (receivedData)=>{
+      this.handleNewVote(receivedData, socket);
+    });
+    socket.to(this.roomName).on('chatMessageSent', (receivedData)=>{
+      this.handleChatMessage(receivedData, socket);
+    });
+    socket.to(this.roomName).on('disconnect', (reason)=>{
+      this.handleDisconnection(reason, socket);
+    });
+
+    //Confirmed
+    let joinedRoomData = {
+      roomName: this.roomName,
+      username: user.username,
+      gameState: this.gameState
+    }
+    console.log('New user joined room ' + joinedRoomData.roomName + ': ' + joinedRoomData.username + ' ' + socket.id);
+    io.to(socket.id).emit('joinedRoom', joinedRoomData);
+    io.to(this.roomName).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
+  }
+
+  this.addUserByUsername = function(username, socket) {
     //Try to find username already in list
-    let user = this.findUserByUsername(filteredUsername);
+    let user = this.findUserByUsername(username);
     //If username was found already in list...
     if(user) {
       if(user.socket == undefined) { //...If there is no socket, attribute this socket to the same user
         user.socket = socket;
       } else {
-        let differentUsernameGenerated = filteredUsername;
+        //Generate different username (user --> user2 --> user3) and create new user
+        let differentUsernameGenerated = username;
         let counter = 2;
         while(this.findUserByUsername(differentUsernameGenerated + counter)) {
           counter++;
         }
-        user = this.createUserByUsername(differentUsernameGenerated + counter, socket);
+        user = new User(socket, differentUsernameGenerated + counter);
       }
     } else {
       //If username is not in list, attribute username to this socket
-      user = this.createUserByUsername(filteredUsername, socket);
-      user.socket = socket;
+      user = new User(socket, username);
     }
-    this.clients.push(user);
-    console.log('New user joined room ' + this.room + ': ' + filteredUsername + ' ' + socket.id);
-  }
-
-  this.findUserByUsername = function(username) {
-    for(let i = 0; i < this.clients.length; i++) {
-      if(this.clients[i].username == username) {
-        return this.clients[i];
-      }
-    }
-    return undefined;
-  }
-
-  this.createUserByUsername = function(newUsername, socket) {
-    let user = this.getUser(socket.id);
-    if(!user) {
-      user = new Client(socket);
-    }
-    let filteredUsername = filteredText(newUsername);
-    user.username = filteredUsername;
-    io.to(socket.id).emit('usernameConfirmed', filteredUsername);
+    this.users.push(user);
     return user;
   }
 
-  this.startNewGame = function() {
+  this.findUserByUsername = function(username) {
+    return this.users.find(function(tempUser) {
+      tempUser.username == username;
+    });
+  }
+
+  this.startNewRound = function() {
     this.gameState.state = 'playing';
     this.serverTimer = -1;
     this.timerSetTimeoutFunction = undefined;
-
-    for(let i = 0; i < this.clients.length; i++) {
-      this.clients[i].answers = [];
+    for(let i = 0; i < this.users.length; i++) {
+      this.users[i].answers = [];
     }
 
     let alphabet = 'AAABBBCCCDDDEEEFFFGGGHIIIJJJKLLLMMMNNNOOOPPPQQRRRSSSTTTUUUVVWXYZ';
     let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
+    let activeCategoriesThisRound = this.getCategoriesForThisRound(5);
     let gettingReadyExtraTime = 5;
     let totalTime = 100 + gettingReadyExtraTime;
-    let activeCategoriesThisRound = this.getCategoriesForThisRound(5);
 
     this.gameState.roundInfo = {
       randomLetter: randomLetter,
       categories: activeCategoriesThisRound,
       totalTime: totalTime
     }
-    io.to(this.room).emit('gameStarted', this.gameState.roundInfo);
+    io.to(this.roomName).emit('gameStarted', this.gameState.roundInfo);
 
     this.initializeTimer(totalTime);
   }
@@ -168,7 +160,7 @@ function Room(room) {
     if(this.serverTimer > 0) {
       this.serverTimer = this.serverTimer - 1;
       this.timerSetTimeoutFunction = setTimeout(()=>{this.updateTimer()}, 1000);
-      io.to(this.room).emit('tickSecond', {timeCurrentValue: this.serverTimer});
+      io.to(this.roomName).emit('tickSecond', {timeCurrentValue: this.serverTimer});
       this.checkEarlyEnd();
     } else {
       //Timer expired
@@ -178,9 +170,9 @@ function Room(room) {
 
   this.checkEarlyEnd = function() {
     let haveEveryoneFinished = true;
-    for(let i = 0; i < this.clients.length; i++) {
-      if(this.clients[i].socket) {
-        if(this.clients[i].answers.length < this.gameState.roundInfo.categories.length) {
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].socket) {
+        if(this.users[i].answers.length < this.gameState.roundInfo.categories.length) {
           haveEveryoneFinished = false;
           return;
         }
@@ -195,7 +187,7 @@ function Room(room) {
   this.finishRound = function() {
     clearTimeout(this.timerSetTimeoutFunction);
     this.gameState.state = 'results';
-    io.to(this.room).emit('serverTimerExpired', this.getAnswersForAllCategories());
+    io.to(this.roomName).emit('roundFinished', this.getAnswersForAllCategories());
   }
 
   this.getCategoriesForThisRound = function(amount) {
@@ -214,30 +206,31 @@ function Room(room) {
   }
 
   this.getAnswersForAllCategories = function() {
+    /*
     //TODO: Refactor archiving
-    let answersForAllCategories = [];
-    for(let categoryIndex = 0; categoryIndex < this.gameState.roundInfo.categories.length; categoryIndex++) {
-      let categoryAnswer = {
-        category: this.gameState.roundInfo.categories[categoryIndex].categoryString,
-        answers: []
-      }
-      answersForAllCategories.push(categoryAnswer);
-      for(let clientIndex = 0; clientIndex < this.clients.length; clientIndex++) {
-        if(this.clients[clientIndex].answers) {
-          for(let i = 0; i < this.clients[clientIndex].answers.length; i++) {
-            if(this.clients[clientIndex].answers[i].questionIndex == categoryIndex) {
-              let answer = {
-                answerString: this.clients[clientIndex].answers[i].answerString,
-                authorUsername: this.clients[clientIndex].username
-              }
-              answersForAllCategories[categoryIndex].answers.push(answer);
-            }
-          }
-        }
-      }
-    }
-    archiveAnswers(answersForAllCategories);
-    //END REFACTOR ARCHIVING
+    // let answersForAllCategories = [];
+    // for(let categoryIndex = 0; categoryIndex < this.gameState.roundInfo.categories.length; categoryIndex++) {
+    //   let categoryAnswer = {
+    //     category: this.gameState.roundInfo.categories[categoryIndex].categoryString,
+    //     answers: []
+    //   }
+    //   answersForAllCategories.push(categoryAnswer);
+    //   for(let clientIndex = 0; clientIndex < this.users.length; clientIndex++) {
+    //     if(this.users[clientIndex].answers) {
+    //       for(let i = 0; i < this.users[clientIndex].answers.length; i++) {
+    //         if(this.users[clientIndex].answers[i].questionIndex == categoryIndex) {
+    //           let answer = {
+    //             answerString: this.users[clientIndex].answers[i].answerString,
+    //             authorUsername: this.users[clientIndex].username
+    //           }
+    //           answersForAllCategories[categoryIndex].answers.push(answer);
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    // archiveAnswers(answersForAllCategories);
+    */
 
     return this.gameState.roundInfo.categories;
   }
@@ -254,23 +247,23 @@ function Room(room) {
     // }
     if(!targetAnswer.votes.includes(data.votingUser)) {
       targetAnswer.votes.push(data.votingUser);
-      io.to(this.room).emit('votesUpdated', this.gameState.roundInfo.categories);
+      io.to(this.roomName).emit('votesUpdated', this.gameState.roundInfo.categories);
     }
 
     let user = this.findUserByUsername(data.votedUser);
     if(user) {
       user.score++;
     }
-    io.to(this.room).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
+    io.to(this.roomName).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
   }
 
   this.getListOfActiveUsernames = function() {
     let activeUsernames = [];
-    for(let i = 0; i < this.clients.length; i++) {
-      if(this.clients[i].socket) {
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].socket) {
         activeUsernames.push({
-          username: this.clients[i].username,
-          score: this.clients[i].score
+          username: this.users[i].username,
+          score: this.users[i].score
         });
       }
     }
@@ -278,20 +271,21 @@ function Room(room) {
   }
 
   this.handleDisconnection = function(reason, socket) {
-    console.log('Disconnected from room ' + this.room + ': ' + socket.id + ' ('+reason+')');
-    for(let i = 0; i < this.clients.length; i++) {
-      if(this.clients[i].socket != undefined) {
-        if(this.clients[i].socket.id == socket.id) {
-          this.clients[i].socket.disconnect();
-          this.clients[i].socket = undefined;
+    connectedUsersCounter = Math.max((connectedUsersCounter - 1), 0);
+    console.log('Disconnected from room ' + this.roomName + ': ' + socket.id + ' ('+reason+')');
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].socket != undefined) {
+        if(this.users[i].socket.id == socket.id) {
+          this.users[i].socket.disconnect();
+          this.users[i].socket = undefined;
           break;
         }
       }
     }
 
     let isRoomEmpty = true;
-    for(let i = 0; i < this.clients.length; i++) {
-      if(this.clients[i].socket != undefined) {
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].socket != undefined) {
         isRoomEmpty = false;
       }
     }
@@ -301,7 +295,7 @@ function Room(room) {
       return;
     }
 
-    io.to(this.room).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
+    io.to(this.roomName).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
 
   }
 
@@ -319,22 +313,24 @@ function Room(room) {
     this.gameState.roundInfo.categories[data.questionIndex].answers[user.username] = answer;
   }
 
-  this.getUser = function(id) {
-    for(let i = 0; i < this.clients.length; i++) {
-      if(this.clients[i].socket != undefined) {
-        if(id == this.clients[i].socket.id) {
-          return this.clients[i];
+  this.getUser = function(socketId) {
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].socket != undefined) {
+        if(socketId == this.users[i].socket.id) {
+          return this.users[i];
         }
       }
     }
     return undefined;
   }
 
-  this.handleChatMessage = function(data, socket) {
-    let filteredMessage = filteredText(data);
-    let message = this.getUser(socket.id).username + ': ' + '<strong>' + filteredMessage + '</strong>';
-    io.to(this.room).emit('chatMessageSent', message);
-    //io.sockets.emit('message', data);
+  this.handleChatMessage = function(receivedData, socket) {
+    let text = receivedData;
+    let messageData = {
+      username: this.getUser(socket.id).username,
+      text: filteredText(text)
+    };
+    io.to(this.roomName).emit('chatMessageSent', messageData);
   }
 }
 

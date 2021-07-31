@@ -69,7 +69,7 @@ function setup() {
 
   initializeHtmlElements();
   initializeRandomUsername();
-  initializeRoom();
+  initializeRoomName();
 
   currentCategoryIndex = 0;
   categoriesList = [];
@@ -99,9 +99,9 @@ function initializeHtmlElements() {
   joinFriendRoomButton = select('#join-friend-room-button').elt.addEventListener('click', goToJoinRoomScreen);
 
   startButton = select('#start-button');
-  startButton.elt.addEventListener('click', startGame);
+  startButton.elt.addEventListener('click', requestToStartRound);
   restartButton = select('#restart-button');
-  restartButton.elt.addEventListener('click', startGame);
+  restartButton.elt.addEventListener('click', requestToStartRound);
 
   activeUsernamesContainer = select('#usernames-list-container');
   activeUsernamesListContainer = select('#usernames-list');
@@ -155,7 +155,7 @@ function goToJoinRoomScreen() {
   }, 1);
 }
 
-function initializeRoom() {
+function initializeRoomName() {
   if(location.hash != '') {
     updateRoomNameFromURLHash();
     changeScreenStateTo('JOIN_ROOM_SCREEN');
@@ -190,73 +190,64 @@ function validateUsernameOnInput() {
 }
 
 function requestToJoinRoom() {
-  if(joinData.roomTextInput.value() == '') {
-    return;
-  }
+  if(joinData.roomTextInput.value() == '') { return; }
   roomName = joinData.roomTextInput.value().toLowerCase();
-  if(joinData.usernameTextInput.value() == '') {
-    return;
-  }
+  if(joinData.usernameTextInput.value() == '') { return; }
+  username = joinData.usernameTextInput.value();
   setupSocket();
-
 }
 
 function setupSocket() {
   socket = io.connect(HOST);
   console.log('Requesting connection to server...');
   socket.on('newSocketConnection', handleNewSocketConnection);
-  socket.on('userJoinedGame', handleUserJoinedGame);
-  socket.on('usernameConfirmed', handleUsernameConfirmed);
-  socket.on('gameStarted', initializeGame);
+  socket.on('joinedRoom', handleJoinedRoom);
+  socket.on('gameStarted', handleGameStarted);
   socket.on('votesUpdated', handleVotesUpdated);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('tickSecond', handleTickSecond);
-  socket.on('serverTimerExpired', handleGameRoundEnded);
+  socket.on('roundFinished', handleRoundFinished);
   socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
 }
 
 function handleNewSocketConnection(data) {
   console.log('Connected to server');
-  if(joinData.roomTextInput.value() == '') {
-    return;
+  console.log('Requesting to join room ' + roomName + ' as ' + username + '...');
+  let requestToJoinRoomData = {
+    roomName: roomName,
+    username: username
   }
-  roomName = joinData.roomTextInput.value().toLowerCase();
-  if(joinData.usernameTextInput.value() == '') {
-    return;
-  }
-  let joinRoomData = {
-    room: roomName,
-    username: joinData.usernameTextInput.value()
-  }
-  socket.emit('requestToJoinRoom', joinRoomData);
+  socket.emit('requestToJoinRoom', requestToJoinRoomData);
 }
 
-function handleUsernameConfirmed(data) {
-  username = data;
-  console.log('Username: ' + username);
-}
+function handleJoinedRoom(receivedData) {
+  let joinedRoomData = receivedData;
 
-function handleUserJoinedGame(data) {
-  let gameState = data.gameState;
+  let gameState = joinedRoomData.gameState;
   if(gameState.state == 'waiting') {
     changeScreenStateTo('LOBBY');
   }
   if (gameState.state == 'playing') {
-    initializeGame(gameState.roundInfo);
+    handleGameStarted(gameState.roundInfo);
   }
   if (gameState.state == 'results') {
     changeScreenStateTo('RESULTS');
   }
-  let roomNameFiltered = filteredText(data.room);
-  console.log('User joined room ' + roomNameFiltered);
+
+  let roomNameFiltered = filteredText(joinedRoomData.roomName);
   roomNameDisplay.html(roomNameFiltered);
   history.pushState(null, null, '#'+roomNameFiltered);
+  console.log('Joined room ' + roomNameFiltered + ' as ' + joinedRoomData.username);
 }
 
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
-  let sortedUserList = data.sort(scoreCompareFunction);
+
+  let sortedUserList = data.sort(function(a, b) {
+    return b.score - a.score;
+  });
+
   for(let i = 0; i < sortedUserList.length; i++) {
     let text;
     if(sortedUserList[i].score > 0) {
@@ -267,12 +258,10 @@ function handleActiveUsersListUpdated(data) {
     createElement('li', text).addClass('w3-padding-small').parent(activeUsernamesListContainer);
   }
 }
-function scoreCompareFunction(a, b) {
-  return b.score - a.score;
-}
 
-function startGame() {
-  socket.emit('requestNewGame');
+
+function requestToStartRound() {
+  socket.emit('requestNewRound');
 }
 
 function initializeTimer(initialTime) {
@@ -296,8 +285,8 @@ function updateTimer() {
 }
 */
 
-function initializeGame(data) {
-  let roundInfo = data;
+function handleGameStarted(receivedData) {
+  let roundInfo = receivedData;
   updateCurrentLetter(roundInfo.randomLetter);
 
   categoriesList = [];
@@ -310,7 +299,7 @@ function initializeGame(data) {
   }
   updateCurrentCategoryDisplayed(0);
 
-  initializeTimer(data.totalTime);
+  initializeTimer(roundInfo.totalTime);
 
   changeScreenStateTo('STARTING_GAME');
   setTimeout(()=>{
@@ -414,25 +403,26 @@ function confirmCategory() {
   }
 }
 
-function handleGameRoundEnded(data) {
-  presentAllAnswers(data);
+function handleRoundFinished(receivedData) {
+  let categories = receivedData;
+  presentAllAnswers(categories);
   changeScreenStateTo('RESULTS');
 }
 
-function presentAllAnswers(data) {
-  console.log(data);
+function presentAllAnswers(categories) {
+  console.log(categories);
   resultsSentenceContainer.html('');
   createElement('hr').parent(resultsSentenceContainer);
-  for(let tempCategoryIndex = 0; tempCategoryIndex < data.length; tempCategoryIndex++) {
-    answersUser = Object.keys(data[tempCategoryIndex].answers);
+  for(let tempCategoryIndex = 0; tempCategoryIndex < categories.length; tempCategoryIndex++) {
+    answersUser = Object.keys(categories[tempCategoryIndex].answers);
     if(answersUser.length > 0) { //If received answer from at least 1 user
       for(let i = 0; i < answersUser.length; i++) {
         createFormatedAnswerInParent(
-          data[tempCategoryIndex].categoryString,
-          data[tempCategoryIndex].answers[answersUser[i]].answerString,
+          categories[tempCategoryIndex].categoryString,
+          categories[tempCategoryIndex].answers[answersUser[i]].answerString,
           tempCategoryIndex,
           answersUser[i],
-          data[tempCategoryIndex].answers[answersUser[i]].votes,
+          categories[tempCategoryIndex].answers[answersUser[i]].votes,
           resultsSentenceContainer
         );
       }
@@ -493,15 +483,20 @@ function handleSendMessageButtonClicked() {
   if(chat.messageInput.value() == '') {
     return;
   }
-  let data = chat.messageInput.value();
-  console.log("Sent:" + data);
-  socket.emit('chatMessageSent', data);
+  let text = chat.messageInput.value();
+  console.log("Sent: " + text);
+  socket.emit('chatMessageSent', text);
   chat.messageInput.value('');
 }
 
-function handleChatMessageReceived(data) {
-  console.log("Received:" + data);
-  createP(data).parent(chat.messagesContainer);
+function handleChatMessageReceived(receivedData) {
+  let messageData = receivedData;
+  messageData.username = filteredText(messageData.username);
+  messageData.text = filteredText(messageData.text);
+
+  console.log('Received from ' + messageData.username + ': ' + messageData.text);
+  let displayedMessage = messageData.username + ': ' + '<strong>' + messageData.text + '</strong>';
+  createP(displayedMessage).parent(chat.messagesContainer);
   chat.messagesContainer.elt.scrollTo(0,9999999999);
 }
 
