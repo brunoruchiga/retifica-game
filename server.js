@@ -371,7 +371,6 @@ function archiveAnswers(newAnswers) {
 
 let isEdittingSuggestionFile = false;
 function addSuggestion(text) {
-  return;
   let filteredSuggestion = filteredText(text);
   if(isEdittingSuggestionFile) {
     //Is file is being written, try again 1s after and abort this function
@@ -478,6 +477,7 @@ let questions = [
   'Saiba mais sobre ___, a profissão do futuro',
   'Você nunca deve misturar ___ com bebida',
   'Por favor, não coloque ___ no micro-ondas',
+  'Personagem que seria um bom presidente',
 
 
   //Cards Against Humanity
@@ -505,10 +505,6 @@ let questions = [
   '___: O Musical',
   'Não sei com que armas será lutada a 3ª Guerra Mundial, mas a 4ª Guerra Mundial será com ___',
   // 'Como eu perdi minha virgindade?',
-
-  //https://www.reddit.com/r/northernlion/comments/duhk4u/128_quiplash_prompts/
-  'Desenho animado',
-  'Personagem que seria um bom presidente',
 
   //https://www.trueachievements.com/a208499/quiplash-xl-back-talk-achievement
   'O segredo para uma vida feliz:',
