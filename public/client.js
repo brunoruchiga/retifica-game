@@ -522,7 +522,7 @@ function createAnswerInParent(answer, categoryIndex, answerUser, votes, targetPa
   });
 
   //Content
-  createSpan(answer).addClass('w3-black').addClass('category-answer').parent(sentenceButton);
+  createSpan(answer).addClass('w3-black').addClass('category-answer').addClass('category').parent(sentenceButton);
 
   //Votes
   if(votes.length > 0) {
