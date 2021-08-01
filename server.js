@@ -51,6 +51,7 @@ function User(socket, username) {
   this.socket = socket;
   this.answers = [];
   this.score = 0;
+  this.isOwner = false;
 }
 
 function GameState() {
@@ -63,11 +64,18 @@ function Room(room) {
   this.roomName = room;
   this.users = [];
   this.active = true;
-  this.gameState  = new GameState();
+  this.gameState = new GameState();
   this.allQuestionsRandomized = getRandomizedQuestions();
+  this.owner = undefined;
 
   this.joinUserToRoom = function(username, socket) {
     let user = this.addUserByUsername(username, socket);
+
+    //Set owner
+    if(this.owner == undefined) {
+      this.owner = user;
+      user.isOwner = true;
+    }
 
     //Bind events
     socket.to(this.roomName).on('requestNewRound', ()=>{
@@ -78,6 +86,9 @@ function Room(room) {
     });
     socket.to(this.roomName).on('sendVote', (receivedData)=>{
       this.handleNewVote(receivedData, socket);
+    });
+    socket.to(this.roomName).on('goToCategory', (receivedData)=>{
+      this.goToCategory(receivedData);
     });
     socket.to(this.roomName).on('chatMessageSent', (receivedData)=>{
       this.handleChatMessage(receivedData, socket);
@@ -90,7 +101,8 @@ function Room(room) {
     let joinedRoomData = {
       roomName: this.roomName,
       username: user.username,
-      gameState: this.gameState
+      gameState: this.gameState,
+      isOwner: user.isOwner
     }
     console.log('New user joined room ' + joinedRoomData.roomName + ': ' + joinedRoomData.username + ' ' + socket.id);
     io.to(socket.id).emit('joinedRoom', joinedRoomData);
@@ -122,13 +134,17 @@ function Room(room) {
   }
 
   this.findUserByUsername = function(username) {
-    return this.users.find(function(tempUser) {
-      tempUser.username == username;
-    });
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].username == username) {
+        return this.users[i];
+      }
+    }
+    return undefined;
   }
 
   this.startNewRound = function() {
     this.gameState.state = 'playing';
+    this.gameState.results = undefined;
     this.serverTimer = -1;
     this.timerSetTimeoutFunction = undefined;
     for(let i = 0; i < this.users.length; i++) {
@@ -187,7 +203,12 @@ function Room(room) {
   this.finishRound = function() {
     clearTimeout(this.timerSetTimeoutFunction);
     this.gameState.state = 'results';
-    io.to(this.roomName).emit('roundFinished', this.getAnswersForAllCategories());
+    this.gameState.results = {
+      allCategories: this.getAnswersForAllCategories(),
+      currentCategoryIndex: 0
+    };
+
+    io.to(this.roomName).emit('roundFinished', this.gameState.results);
   }
 
   this.getCategoriesForThisRound = function(amount) {
@@ -235,20 +256,31 @@ function Room(room) {
     return this.gameState.roundInfo.categories;
   }
 
+  this.goToCategory = function(receivedData) {
+    io.to(this.roomName).emit('currentCategoryChanged', {
+      index: receivedData.index
+    });
+  }
+
   this.handleNewVote = function(data) {
     let targetCategory = this.gameState.roundInfo.categories[data.categoryIndex];
-    let targetAnswer = targetCategory.answers[data.votedUser]
+    let targetAnswer = targetCategory.answers[data.votedUser];
+    let answerAuthorKeys = Object.keys(targetCategory.answers)
 
-    // let keys = Object.keys(targetCategory.answers)
-    // for(let i = 0; i < keys.length; i++) {
-    //   if(targetCategory.answers[keys[i]].votes.includes(data.votingUser)) {
-    //     return;
-    //   }
-    // }
-    if(!targetAnswer.votes.includes(data.votingUser)) {
-      targetAnswer.votes.push(data.votingUser);
-      io.to(this.roomName).emit('votesUpdated', this.gameState.roundInfo.categories);
+    //If trying to vote in self, abort
+    if(data.votedUser == data.votingUser) {
+      return;
     }
+
+    //If already voted in this category, abort
+    for(let i = 0; i < answerAuthorKeys.length; i++) {
+      if(targetCategory.answers[answerAuthorKeys[i]].votes.includes(data.votingUser)) {
+        return;
+      }
+    }
+
+    targetAnswer.votes.push(data.votingUser);
+    io.to(this.roomName).emit('votesUpdated', this.gameState.results);
 
     let user = this.findUserByUsername(data.votedUser);
     if(user) {
@@ -261,13 +293,27 @@ function Room(room) {
     let activeUsernames = [];
     for(let i = 0; i < this.users.length; i++) {
       if(this.users[i].socket) {
-        activeUsernames.push({
+        let userPublicData = {
           username: this.users[i].username,
-          score: this.users[i].score
-        });
+          score: this.users[i].score,
+          isOwner: this.users[i].isOwner
+        }
+        activeUsernames.push(userPublicData);
       }
     }
     return activeUsernames;
+  }
+
+  this.findNewOwner = function() {
+    for(let i = 0; i < this.users.length; i++) {
+      if(this.users[i].socket != undefined) {
+        this.owner = this.users[i];
+        this.users[i].isOwner = true;
+        io.to(this.users[i].socket.id).emit('setAsOwner', {isOwner: true});
+        io.to(this.roomName).emit('activeUsersListUpdated', this.getListOfActiveUsernames());
+        return;
+      }
+    }
   }
 
   this.handleDisconnection = function(reason, socket) {
@@ -278,6 +324,10 @@ function Room(room) {
         if(this.users[i].socket.id == socket.id) {
           this.users[i].socket.disconnect();
           this.users[i].socket = undefined;
+          if(this.users[i].isOwner) {
+            this.users[i].isOwner = false;
+            this.findNewOwner();
+          }
           break;
         }
       }

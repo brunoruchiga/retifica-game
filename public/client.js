@@ -21,7 +21,10 @@ let joinData = {
 let roomNameDisplay;
 let createRoomButton, joinFriendRoomButton;
 
+let startButtonContainer, restartButtonContainer;
 let startButton, restartButton;
+let waitingOwnerStart, waitingOwnerRestart;
+let nextCategory, previousCategory;
 
 let activeUsernamesContainer;
 let activeUsernamesListContainer;
@@ -64,6 +67,12 @@ let suggestions = {
 let warningContainer;
 let warningMessageSlot;
 
+let isRoomOwner = false;
+let currentResultsCategoryIndex = 0;
+let resultsCategoriesLength = 0;
+
+let gameStateCopy = {};
+
 function setup() {
   noCanvas();
 
@@ -98,10 +107,19 @@ function initializeHtmlElements() {
   createRoomButton = select('#create-room-button').elt.addEventListener('click', goToCreateRoomScreen); //mousePressed(goToCreateRoomScreen);
   joinFriendRoomButton = select('#join-friend-room-button').elt.addEventListener('click', goToJoinRoomScreen);
 
+  startButtonContainer = select('#start-button-container');
+  restartButtonContainer = select('#restart-button-container');
   startButton = select('#start-button');
   startButton.elt.addEventListener('click', requestToStartRound);
+  waitingOwnerStart = select('#waiting-owner-start');
   restartButton = select('#restart-button');
   restartButton.elt.addEventListener('click', requestToStartRound);
+  waitingOwnerRestart = select('#waiting-owner-restart');
+
+  nextCategory = select('#next-category-button');
+  nextCategory.elt.addEventListener('click', goToNextCategory);
+  previousCategory = select('#previous-category-button');
+  previousCategory.elt.addEventListener('click', goToPreviousCategory);
 
   activeUsernamesContainer = select('#usernames-list-container');
   activeUsernamesListContainer = select('#usernames-list');
@@ -202,7 +220,9 @@ function setupSocket() {
   console.log('Requesting connection to server...');
   socket.on('newSocketConnection', handleNewSocketConnection);
   socket.on('joinedRoom', handleJoinedRoom);
+  socket.on('setAsOwner', handleSetAsOwner);
   socket.on('gameStarted', handleGameStarted);
+  socket.on('currentCategoryChanged', handleCurrentCategoryChanged);
   socket.on('votesUpdated', handleVotesUpdated);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('tickSecond', handleTickSecond);
@@ -224,6 +244,8 @@ function handleNewSocketConnection(data) {
 function handleJoinedRoom(receivedData) {
   let joinedRoomData = receivedData;
 
+  setMeAsRoomOwner(joinedRoomData.isOwner);
+
   let gameState = joinedRoomData.gameState;
   if(gameState.state == 'waiting') {
     changeScreenStateTo('LOBBY');
@@ -241,6 +263,19 @@ function handleJoinedRoom(receivedData) {
   console.log('Joined room ' + roomNameFiltered + ' as ' + joinedRoomData.username);
 }
 
+function handleSetAsOwner(receivedData) {
+  setMeAsRoomOwner(receivedData.isOwner);
+}
+
+function setMeAsRoomOwner(isOwner) {
+  isRoomOwner = isOwner;
+
+  changeVisibility(startButton, isRoomOwner);
+  changeVisibility(waitingOwnerStart, !isRoomOwner);
+  changeVisibility(restartButton, isRoomOwner);
+  changeVisibility(waitingOwnerRestart, !isRoomOwner);
+}
+
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
 
@@ -249,12 +284,18 @@ function handleActiveUsersListUpdated(data) {
   });
 
   for(let i = 0; i < sortedUserList.length; i++) {
-    let text;
+    let text = sortedUserList[i].username;
+
+    //Score
     if(sortedUserList[i].score > 0) {
-      text = sortedUserList[i].username + ' ✔'+sortedUserList[i].score;
-    } else {
-      text = sortedUserList[i].username;
+      text = text + ' ✔'+sortedUserList[i].score;
     }
+
+    //Owner badge
+    if(sortedUserList[i].isOwner) {
+      text = text + ' ♦';
+    }
+
     createElement('li', text).addClass('w3-padding-small').parent(activeUsernamesListContainer);
   }
 }
@@ -404,31 +445,55 @@ function confirmCategory() {
 }
 
 function handleRoundFinished(receivedData) {
-  let categories = receivedData;
-  presentAllAnswers(categories);
+  gameStateCopy.results = receivedData;
+
+  resultsCategoriesLength = gameStateCopy.results.allCategories.length;
+  currentResultsCategoryIndex = gameStateCopy.results.currentCategoryIndex;
+  currentResultsCategoryIndex = 0;
+  presentAllAnswers();
   changeScreenStateTo('RESULTS');
 }
 
-function presentAllAnswers(categories) {
-  console.log(categories);
+function presentAllAnswers() {
+  console.log(gameStateCopy.results.allCategories);
   resultsSentenceContainer.html('');
   createElement('hr').parent(resultsSentenceContainer);
-  for(let tempCategoryIndex = 0; tempCategoryIndex < categories.length; tempCategoryIndex++) {
-    answersUser = Object.keys(categories[tempCategoryIndex].answers);
-    if(answersUser.length > 0) { //If received answer from at least 1 user
-      for(let i = 0; i < answersUser.length; i++) {
-        createFormatedAnswerInParent(
-          categories[tempCategoryIndex].categoryString,
-          categories[tempCategoryIndex].answers[answersUser[i]].answerString,
-          tempCategoryIndex,
-          answersUser[i],
-          categories[tempCategoryIndex].answers[answersUser[i]].votes,
-          resultsSentenceContainer
-        );
-      }
-      createElement('hr').parent(resultsSentenceContainer);
-    }
+  answersUser = Object.keys(gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers);
+  for(let i = 0; i < answersUser.length; i++) {
+    createFormatedAnswerInParent(
+      gameStateCopy.results.allCategories[currentResultsCategoryIndex].categoryString,
+      gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers[answersUser[i]].answerString,
+      currentResultsCategoryIndex,
+      answersUser[i],
+      gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers[answersUser[i]].votes,
+      resultsSentenceContainer
+    );
   }
+  createElement('hr').parent(resultsSentenceContainer);
+}
+
+function goToNextCategory() {
+  if(currentResultsCategoryIndex+1 < resultsCategoriesLength) {
+    //Go to next
+    let index = currentResultsCategoryIndex+1;
+    socket.emit('goToCategory', {
+      index: index
+    });
+  } else {
+    //Finished
+  }
+}
+
+function goToPreviousCategory() {
+  let index = Math.max((currentResultsCategoryIndex-1), 0);
+  socket.emit('goToCategory', {
+    index: index
+  });
+}
+
+function handleCurrentCategoryChanged(receivedData) {
+  currentResultsCategoryIndex = receivedData.index;
+  presentAllAnswers();
 }
 
 function createFormatedAnswerInParent(sentence, answer, categoryIndex, answerUser, votes, targetParent) {
@@ -475,8 +540,10 @@ function voteFor(categoryIndex, answerUser) {
   socket.emit('sendVote', vote);
 }
 
-function handleVotesUpdated(data) {
-  presentAllAnswers(data);
+function handleVotesUpdated(receivedData) {
+  let results = receivedData;
+
+  presentAllAnswers(results.allCategories, currentResultsCategoryIndex);
 }
 
 function handleSendMessageButtonClicked() {
@@ -538,8 +605,8 @@ function getAllElements() {
     containerStart,
     containerLogin,
     containerBody,
-    startButton,
-    restartButton,
+    startButtonContainer,
+    restartButtonContainer,
     gameRoundContainer,
     categoriesContainer,
     waitingEndFeedbackMessage,
@@ -560,7 +627,7 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([header, headerTagline, footer, containerLogin]);
   }
   if(newState == 'LOBBY') {
-    activateOnlyActiveElements([header, headerTagline, footer, containerBody, startButton, chat.container, suggestions.container, activeUsernamesContainer]);
+    activateOnlyActiveElements([header, headerTagline, footer, containerBody, startButtonContainer, chat.container, suggestions.container, activeUsernamesContainer]);
   }
   if(newState == 'STARTING_GAME') {
     activateOnlyActiveElements([startingRoundContainer, containerBody, activeUsernamesContainer]);
@@ -569,7 +636,7 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([gameRoundContainer, categoriesContainer, containerBody, activeUsernamesContainer]);
   }
   if(newState == 'RESULTS') {
-    activateOnlyActiveElements([header, footer, containerBody, restartButton, resultsContainer, chat.container, suggestions.container, activeUsernamesContainer]);
+    activateOnlyActiveElements([header, footer, containerBody, restartButtonContainer, resultsContainer, chat.container, suggestions.container, activeUsernamesContainer]);
   }
 }
 

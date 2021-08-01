@@ -427,7 +427,10 @@
         </div>
 
         <div id='container-body' class='w3-panel w3-padding-16'>
-          <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar →</button>
+          <div id='start-button-container'>
+            <button id='start-button' class='w3-btn w3-black w3-xxlarge'>Começar →</button>
+            <div id='waiting-owner-start' class='hidden'><p>Aguardando o dono da sala iniciar a rodada...</p></div>
+          </div>
           <div id='starting-round' class='hidden'>
             <p>Prepare-se! Começando...</p>
             <p>Complete os espaços em branco com expressões que iniciem com a letra<span id='letter-in-instructions'>...</span></p>
@@ -450,12 +453,17 @@
           <div id='results-container'>
             <div id='results-instructions'><p><strong>Escolha a melhor resposta:</strong></p></div>
             <div id='results-sentence-container'></div>
+            <button id='previous-category-button' class='w3-btn w3-black w3-xxlarge'>←</button>
+            <button id='next-category-button' class='w3-btn w3-black w3-xxlarge'>→</button>
           </div>
           <div id='usernames-list-container' class='container'>
             <p style='margin-bottom:0;'><strong>Sala: <span id='room-name'>_</span></strong></p>
             <ul id='usernames-list' class='w3-ul'></ul>
           </div>
-          <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Nova rodada →</button>
+          <div id='restart-button-container'>
+            <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Nova rodada →</button>
+            <div id='waiting-owner-restart' class='hidden'><p>Aguardando o dono da sala iniciar a próxima rodada...</p></div>
+          </div>
           <div id='chat-container' class='container w3-small'>
             <p><strong>Chat:</strong></p>
             <div id='messages-container' class='container'></div>
