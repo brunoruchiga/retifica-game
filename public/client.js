@@ -273,7 +273,10 @@ function setMeAsRoomOwner(isOwner) {
   changeVisibility(startButton, isRoomOwner);
   changeVisibility(waitingOwnerStart, !isRoomOwner);
   changeVisibility(restartButton, isRoomOwner);
-  changeVisibility(waitingOwnerRestart, !isRoomOwner);
+  // changeVisibility(waitingOwnerRestart, !isRoomOwner);
+
+  changeVisibility(nextCategory, isRoomOwner);
+  changeVisibility(nextCategory, isRoomOwner);
 }
 
 function handleActiveUsersListUpdated(data) {
@@ -464,6 +467,7 @@ function presentAllAnswers() {
 
   for(let i = 0; i < answersUser.length; i++) {
     createAnswerInParent(
+      i,
       gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers[answersUser[i]].answerString,
       currentResultsCategoryIndex,
       answersUser[i],
@@ -514,7 +518,7 @@ function createFormatedSentenceInParent(sentence, answer, targetParent) {
   }
 }
 
-function createAnswerInParent(answer, categoryIndex, answerUser, votes, targetParent) {
+function createAnswerInParent(answerIndex, answer, categoryIndex, answerUser, votes, targetParent) {
   //Button
   let sentenceButton = createButton('').addClass('w3-btn').addClass('container-button').parent(targetParent);
   sentenceButton.elt.addEventListener('click', ()=>{
@@ -522,6 +526,9 @@ function createAnswerInParent(answer, categoryIndex, answerUser, votes, targetPa
   });
 
   //Content
+  let indexIdentifierAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+  let indexIdentifier = indexIdentifierAlphabet.charAt(answerIndex % indexIdentifierAlphabet.length) + '.' + '&nbsp;';
+  createSpan(indexIdentifier).addClass('category').parent(sentenceButton);
   createSpan(answer).addClass('w3-black').addClass('category-answer').addClass('category').parent(sentenceButton);
 
   //Votes
