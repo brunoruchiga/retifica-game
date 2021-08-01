@@ -459,9 +459,11 @@ function presentAllAnswers() {
   resultsSentenceContainer.html('');
   createElement('hr').parent(resultsSentenceContainer);
   answersUser = Object.keys(gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers);
+
+  createFormatedSentenceInParent(gameStateCopy.results.allCategories[currentResultsCategoryIndex].categoryString, '_____', resultsSentenceContainer);
+
   for(let i = 0; i < answersUser.length; i++) {
-    createFormatedAnswerInParent(
-      gameStateCopy.results.allCategories[currentResultsCategoryIndex].categoryString,
+    createAnswerInParent(
       gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers[answersUser[i]].answerString,
       currentResultsCategoryIndex,
       answersUser[i],
@@ -496,15 +498,9 @@ function handleCurrentCategoryChanged(receivedData) {
   presentAllAnswers();
 }
 
-function createFormatedAnswerInParent(sentence, answer, categoryIndex, answerUser, votes, targetParent) {
-  //Button
-  let sentenceButton = createButton('').addClass('w3-btn').addClass('container-button').parent(targetParent);
-  sentenceButton.elt.addEventListener('click', ()=>{
-    voteFor(categoryIndex, answerUser);
-  });
-
+function createFormatedSentenceInParent(sentence, answer, targetParent) {
   //Content
-  let pContainer = createP('').addClass('category').parent(sentenceButton);
+  let pContainer = createP('').addClass('category').parent(targetParent);
   let sentenceSplited = String(sentence).split('___');
   if(sentenceSplited.length == 1) {
     createSpan(sentenceSplited[0] + '<br/>').parent(pContainer);
@@ -516,13 +512,24 @@ function createFormatedAnswerInParent(sentence, answer, categoryIndex, answerUse
   } else {
     //Error
   }
+}
+
+function createAnswerInParent(answer, categoryIndex, answerUser, votes, targetParent) {
+  //Button
+  let sentenceButton = createButton('').addClass('w3-btn').addClass('container-button').parent(targetParent);
+  sentenceButton.elt.addEventListener('click', ()=>{
+    voteFor(categoryIndex, answerUser);
+  });
+
+  //Content
+  createSpan(answer).addClass('w3-black').addClass('category-answer').parent(sentenceButton);
 
   //Votes
   if(votes.length > 0) {
-    let answersContainer = createDiv('').parent(targetParent);
+    let answersContainer = createSpan('').parent(sentenceButton);
     for(let i = 0; i < votes.length; i++) {
       // createDiv('★ '+votes[i]).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-tiny').parent(answersContainer);
-      createDiv('✔').addClass('vote-from').parent(answersContainer);
+      createSpan('✔').addClass('vote-from').parent(answersContainer);
     }
     // createDiv('✔ '+votes.length).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-small').parent(answersContainer);
   }
@@ -541,9 +548,8 @@ function voteFor(categoryIndex, answerUser) {
 }
 
 function handleVotesUpdated(receivedData) {
-  let results = receivedData;
-
-  presentAllAnswers(results.allCategories, currentResultsCategoryIndex);
+  gameStateCopy.results = receivedData;
+  presentAllAnswers();
 }
 
 function handleSendMessageButtonClicked() {
