@@ -526,10 +526,10 @@ function createAnswerInParent(answer, categoryIndex, answerUser, votes, targetPa
 
   //Votes
   if(votes.length > 0) {
-    let answersContainer = createSpan('').parent(sentenceButton);
+    let answersContainer = createSpan('').addClass('vote-from').parent(sentenceButton);
     for(let i = 0; i < votes.length; i++) {
       // createDiv('★ '+votes[i]).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-tiny').parent(answersContainer);
-      createSpan('✔').addClass('vote-from').parent(answersContainer);
+      createSpan('✔').parent(answersContainer);
     }
     // createDiv('✔ '+votes.length).addClass('vote-from').addClass('w3-card').addClass('w3-light-grey').addClass('w3-small').parent(answersContainer);
   }
