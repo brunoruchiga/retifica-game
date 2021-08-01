@@ -90,6 +90,9 @@ function Room(room) {
     socket.to(this.roomName).on('goToCategory', (receivedData)=>{
       this.goToCategory(receivedData);
     });
+    socket.to(this.roomName).on('finishResults', ()=>{
+      this.finishResults();
+    });
     socket.to(this.roomName).on('chatMessageSent', (receivedData)=>{
       this.handleChatMessage(receivedData, socket);
     });
@@ -185,6 +188,10 @@ function Room(room) {
   }
 
   this.checkEarlyEnd = function() {
+    if(this.serverTimer <= 5) { //If its almost finishing, abort
+      return;
+    }
+
     let haveEveryoneFinished = true;
     for(let i = 0; i < this.users.length; i++) {
       if(this.users[i].socket) {
@@ -195,7 +202,9 @@ function Room(room) {
       }
     }
     if(haveEveryoneFinished) {
-      this.finishRound();
+      setTimeout(()=>{ //Wait 3 seconds before early finish
+        this.finishRound();
+      }, 3000);
       return;
     }
   }
@@ -260,6 +269,10 @@ function Room(room) {
     io.to(this.roomName).emit('currentCategoryChanged', {
       index: receivedData.index
     });
+  }
+
+  this.finishResults = function() {
+    io.to(this.roomName).emit('finishedResults');
   }
 
   this.handleNewVote = function(data) {
@@ -510,7 +523,6 @@ let questions = [
   'Rolê bad vibe',
   'Fui cancelado por ___',
   'Urgente: Polícia Federal deflagra nova fase da Operação ___',
-  'Novo app revolucionário',
   '___ deveria ser ilegal',
   'Fui no cinema pra ver ___',
   'Corno(a) famoso(a)',

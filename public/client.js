@@ -24,7 +24,7 @@ let createRoomButton, joinFriendRoomButton;
 let startButtonContainer, restartButtonContainer;
 let startButton, restartButton;
 let waitingOwnerStart, waitingOwnerRestart;
-let nextCategory, previousCategory;
+let resultsOwnerControls, previousCategory, nextCategory, lastCategory;
 
 let activeUsernamesContainer;
 let activeUsernamesListContainer;
@@ -116,10 +116,13 @@ function initializeHtmlElements() {
   restartButton.elt.addEventListener('click', requestToStartRound);
   waitingOwnerRestart = select('#waiting-owner-restart');
 
-  nextCategory = select('#next-category-button');
-  nextCategory.elt.addEventListener('click', goToNextCategory);
+  resultsOwnerControls = select('#results-owner-controls');
   previousCategory = select('#previous-category-button');
   previousCategory.elt.addEventListener('click', goToPreviousCategory);
+  nextCategory = select('#next-category-button');
+  nextCategory.elt.addEventListener('click', goToNextCategory);
+  lastCategory = select('#last-category-button');
+  lastCategory.elt.addEventListener('click', finishRound);
 
   activeUsernamesContainer = select('#usernames-list-container');
   activeUsernamesListContainer = select('#usernames-list');
@@ -224,6 +227,7 @@ function setupSocket() {
   socket.on('gameStarted', handleGameStarted);
   socket.on('currentCategoryChanged', handleCurrentCategoryChanged);
   socket.on('votesUpdated', handleVotesUpdated);
+  socket.on('finishedResults', handleFinishedResults);
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('tickSecond', handleTickSecond);
   socket.on('roundFinished', handleRoundFinished);
@@ -273,10 +277,9 @@ function setMeAsRoomOwner(isOwner) {
   changeVisibility(startButton, isRoomOwner);
   changeVisibility(waitingOwnerStart, !isRoomOwner);
   changeVisibility(restartButton, isRoomOwner);
-  // changeVisibility(waitingOwnerRestart, !isRoomOwner);
+  changeVisibility(waitingOwnerRestart, !isRoomOwner);
 
-  changeVisibility(nextCategory, isRoomOwner);
-  changeVisibility(nextCategory, isRoomOwner);
+  changeVisibility(resultsOwnerControls, isRoomOwner);
 }
 
 function handleActiveUsersListUpdated(data) {
@@ -451,16 +454,16 @@ function handleRoundFinished(receivedData) {
   gameStateCopy.results = receivedData;
 
   resultsCategoriesLength = gameStateCopy.results.allCategories.length;
-  currentResultsCategoryIndex = gameStateCopy.results.currentCategoryIndex;
   currentResultsCategoryIndex = 0;
   presentAllAnswers();
+  updateResultsOwnerControls()
   changeScreenStateTo('RESULTS');
 }
 
 function presentAllAnswers() {
   console.log(gameStateCopy.results.allCategories);
   resultsSentenceContainer.html('');
-  createElement('hr').parent(resultsSentenceContainer);
+  // createElement('hr').parent(resultsSentenceContainer);
   answersUser = Object.keys(gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers);
 
   createFormatedSentenceInParent(gameStateCopy.results.allCategories[currentResultsCategoryIndex].categoryString, '_____', resultsSentenceContainer);
@@ -485,9 +488,12 @@ function goToNextCategory() {
     socket.emit('goToCategory', {
       index: index
     });
-  } else {
-    //Finished
   }
+}
+
+function finishRound() {
+  //Finished
+  socket.emit('finishResults');
 }
 
 function goToPreviousCategory() {
@@ -500,6 +506,17 @@ function goToPreviousCategory() {
 function handleCurrentCategoryChanged(receivedData) {
   currentResultsCategoryIndex = receivedData.index;
   presentAllAnswers();
+  updateResultsOwnerControls();
+}
+
+function updateResultsOwnerControls() {
+  changeVisibility(previousCategory, (currentResultsCategoryIndex > 0));
+  changeVisibility(nextCategory, (currentResultsCategoryIndex < resultsCategoriesLength-1));
+  changeVisibility(lastCategory, (currentResultsCategoryIndex == resultsCategoriesLength-1));
+}
+
+function handleFinishedResults() {
+  changeScreenStateTo('WAITING_NEXT_ROUND');
 }
 
 function createFormatedSentenceInParent(sentence, answer, targetParent) {
@@ -649,7 +666,10 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([gameRoundContainer, categoriesContainer, containerBody, activeUsernamesContainer]);
   }
   if(newState == 'RESULTS') {
-    activateOnlyActiveElements([header, footer, containerBody, restartButtonContainer, resultsContainer, chat.container, suggestions.container, activeUsernamesContainer]);
+    activateOnlyActiveElements([header, containerBody, resultsContainer]);
+  }
+  if(newState == 'WAITING_NEXT_ROUND') {
+    activateOnlyActiveElements([header, footer, containerBody, activeUsernamesContainer, restartButtonContainer, chat.container, suggestions.container]);
   }
 }
 

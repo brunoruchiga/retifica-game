@@ -329,8 +329,11 @@
         font-weight: normal;
       }
       #results-container hr {
-        margin: 1em 0;
+        margin: 4em 0 1em 0;
         border-bottom: 1px solid;
+      }
+      #results-sentence-container .category {
+        margin: 0 0 1em 0;
       }
       .result-category {
         color: #bbb;
@@ -339,8 +342,8 @@
         font-weight: bold;
       }
       .container-button {
-        padding:0.5em 0;
-        margin:0 0 0 2em;
+        padding:0;
+        margin:0 0 0 1.5em;
         /* width:100%; */
         display: block;
         text-align: left;
@@ -452,10 +455,14 @@
             <div id='waiting-end' class='hidden'><p>Aguardando fim do jogo...</p></div>
           </div>
           <div id='results-container'>
-            <!-- <div id='results-instructions'><p><strong>Escolha a melhor resposta:</strong></p></div> -->
             <div id='results-sentence-container'></div>
-            <button id='previous-category-button' class='w3-btn w3-black'>←</button>
-            <button id='next-category-button' class='w3-btn w3-black'>→</button>
+            <div id='results-instructions'><p><strong>Escolha a melhor resposta</strong></p></div>
+            <div id='results-owner-controls'>
+              <div id='results-instructions'><p><strong>Controle da sala:</strong></p></div>
+              <button id='previous-category-button' class='w3-btn w3-black'>←</button>
+              <button id='next-category-button' class='w3-btn w3-black'>Próximo →</button>
+              <button id='last-category-button' class='w3-btn w3-black hidden'>Finalizar rodada →</button>
+            </div>
           </div>
           <div id='usernames-list-container' class='container'>
             <p style='margin-bottom:0;'><strong>Sala: <span id='room-name'>_</span></strong></p>
