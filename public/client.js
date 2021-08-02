@@ -141,7 +141,8 @@ function initializeHtmlElements() {
   categoryAnswerSlotInSentencePre = select('#answer-slot-in-sentence-pre');
   categoryAnswerSlotInSentencePos = select('#answer-slot-in-sentence-pos');
   categoryTextInput = select('#category-input').input(updateAnswerOnInput);
-  confirmCategoryButton = select('#confirm-category').elt.addEventListener('click', confirmCategory);
+  confirmCategoryButton = select('#confirm-category');
+  confirmCategoryButton.elt.addEventListener('click', confirmCategory);
   handleEnterKey(categoryTextInput, confirmCategory);
   waitingEndFeedbackMessage = select('#waiting-end');
 
@@ -397,6 +398,8 @@ function updateCurrentCategoryDisplayed(index) {
   categoryAnswerSlotInSentence.html('_____');
   categoryTextInput.value('');
 
+  updateConfirmCategoryButton();
+
   // playCssAnimation(currentCategoryContainer, 'animate-intro-question');
 }
 function clearCurrentCategoryDisplayed() {
@@ -419,6 +422,16 @@ function updateAnswerOnInput() {
     categoryAnswerSlotInSentence.html('_____');
   } else {
     categoryAnswerSlotInSentence.html(answer);
+  }
+
+  updateConfirmCategoryButton();
+}
+
+function updateConfirmCategoryButton() {
+  if(categoryTextInput.value() == '') {
+    confirmCategoryButton.html('Pular →');
+  } else {
+    confirmCategoryButton.html('→');
   }
 }
 
