@@ -603,7 +603,7 @@ let questionsSuggested = [
 function getRandomizedQuestions() {
   let defaultQuestionsRandomized = shuffle(questions);
   let suggestedQuestionsRandomized = shuffle(questionsSuggested);
-  let resultQuestions = suggestedQuestionsRandomized.concat(defaultQuestionsRandomized);
+  let resultQuestions = defaultQuestionsRandomized; //suggestedQuestionsRandomized.concat(defaultQuestionsRandomized);
 
   return resultQuestions;
 }
