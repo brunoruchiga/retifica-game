@@ -573,8 +573,38 @@ let questions = [
   'Eu aprendi que jamais se deve colocar ___ na pizza',
 ]
 
+let questionsSuggested = [
+  //Sugestões
+  'Tu ficou sabendo? Do cachorro que tentou ___ e conseguiu!',
+  '___ se tu é bem macho!',
+  'Você deveria ter ___',
+  'Eu gosto tanto do jeito que você ___...',
+  'Descobriram um novo gênero humano, o Homo ___.',
+  'Moisés desceu do morro antes que Deus pudesse ditar o 11º mandamento: Não ___.',
+  'Nove em cada dez médicos recomenda ___.',
+  'Maurício tomando vodka com ___',
+  '___ é infalível para animar uma festa',
+  'Se não fosse o Bolsonaro, eu estaria ___.',
+  'Tenho uma fofoca boa: aquele meu colega ___',
+  'No primeiro almoço com minha família, meu/minha namorado(a) estava vestindo ___.',
+  'Encontrei ___ no meu umbigo.',
+  'Caiu minha máscara no(a) ___ e agora vou ter que ir lá pegar.',
+  'Eu já tentei ___, mas não recomendo.',
+  'A NASA descobriu ___ nas luas de Saturno.',
+  'Descobriram que hidroxicloroquina cura ___.',
+  'No almoço com minha família, meu/minha namorado(a) estava vestindo __.',
+  'Tu viu? O Bolsonaro disse vai ___ amanhã.',
+  'O presidente do STF decidiu que ___.',
+  'Minha mãe faz um(a) ___ delicioso(a)!',
+]
+
+
 function getRandomizedQuestions() {
-  return shuffle(questions);
+  let defaultQuestionsRandomized = shuffle(questions);
+  let suggestedQuestionsRandomized = shuffle(questionsSuggested);
+  let resultQuestions = suggestedQuestionsRandomized.concat(defaultQuestionsRandomized);
+
+  return resultQuestions;
 }
 
 function shuffle(array) {
