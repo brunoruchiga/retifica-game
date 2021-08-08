@@ -399,6 +399,7 @@ function Room(room) {
 
 let isEdittingArchiveAnswersFile = false;
 function archiveAnswers(newAnswers) {
+  console.log(newAnswers);
   return;
   if(isEdittingArchiveAnswersFile) {
     //Is file is being written, try again 1s after and abort this function
