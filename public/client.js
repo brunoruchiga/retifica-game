@@ -685,7 +685,7 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([header, footer, containerBody, activeUsernamesContainer, restartButtonContainer, chat.container, suggestions.container]);
   }
   if(newState == 'LOADING') {
-    activateOnlyActiveElements([header]);
+    activateOnlyActiveElements([header, headerTagline]);
   }
 }
 
