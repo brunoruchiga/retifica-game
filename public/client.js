@@ -216,6 +216,7 @@ function requestToJoinRoom() {
   roomName = joinData.roomTextInput.value().toLowerCase();
   if(joinData.usernameTextInput.value() == '') { return; }
   username = joinData.usernameTextInput.value();
+  changeScreenStateTo('LOADING');
   setupSocket();
 }
 
@@ -306,7 +307,6 @@ function handleActiveUsersListUpdated(data) {
     createElement('li', text).addClass('w3-padding-small').parent(activeUsernamesListContainer);
   }
 }
-
 
 function requestToStartRound() {
   socket.emit('requestNewRound');
@@ -683,6 +683,9 @@ function changeScreenStateTo(newState) {
   }
   if(newState == 'WAITING_NEXT_ROUND') {
     activateOnlyActiveElements([header, footer, containerBody, activeUsernamesContainer, restartButtonContainer, chat.container, suggestions.container]);
+  }
+  if(newState == 'LOADING') {
+    activateOnlyActiveElements([header]);
   }
 }
 
