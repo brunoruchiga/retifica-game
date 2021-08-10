@@ -20,7 +20,9 @@ respostas preenchidas
 
 --x--
 
+- Mostrar visualmente a linha contínua ao invés de 5 _ _ _ _ _
 - Loading quando vc tenta acessar as coisas
+- Melhores instruções antes de iniciar
 - "Compartilhe o código/link de sua sala"
 - Fase de mostrar resultados/votos mostra uma frase por vez
 - Mostrar contador de usuários online agora
@@ -38,3 +40,9 @@ respostas preenchidas
 - "Hide room name" for streamers
 - Dono da sala poder skipar
 - Customizar letras
+- "Rodada final" em que sorteia respostas das rodadas anteriores
+- Configurações
+- Configurações: tempo
+- Configurações: máximo de respostas por pergunta
+- Configurações: número de rodadas
+- Configurações: letras possíveis
