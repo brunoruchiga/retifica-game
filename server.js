@@ -629,29 +629,13 @@ let questionsSuggested = [
   'Minha mãe faz um(a) ___ delicioso(a)!',
 ]
 
-let programmersQuestions = [
-  "Trying to fix ___ again (committed 2 minutes ago)",
-  "Vou aproveitar essa game jam para praticar ___",
-  "Meu próximo jogo vai ser feito na nova ___ Engine",
-  "Crashou em ___",
-  "Na próxima sprint eu prometo que a gente pega ___",
-  "Nossa pesquisa com os usuários apontou que a feature mais pedida é ___",
-  "Jogo ruim",
-  "Meu jogo favorito",
-  "void ___() {",
-  "O que vou fazer nas férias",
-  "Nome de estagiário",
-  "Invitation: [Box] ___ @ Tue 2021-06-29 13:30 - 14:30",
-  "O novo boss está dando muito problema porque os GD insistem que ele precisa ___ quando eu entro na box",
-]
-
 
 function getRandomizedQuestions() {
   let defaultQuestionsRandomized = shuffle(questions);
   let suggestedQuestionsRandomized = shuffle(questionsSuggested);
   let resultQuestions = defaultQuestionsRandomized; //suggestedQuestionsRandomized.concat(defaultQuestionsRandomized);
 
-  return shuffle(programmersQuestions);
+  return resultQuestions;
 }
 
 function shuffle(array) {
