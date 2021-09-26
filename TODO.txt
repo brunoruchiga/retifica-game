@@ -17,20 +17,23 @@ respostas preenchidas
 - Outros jogadores podem avaliar respostas
 - Mostrar campo para completar no meio da frase
 - Contador regressivo quando vai começar com instruções
+- Fase de mostrar resultados/votos mostra uma frase por vez
+- Apenas host com controle da sala para começar
+- Mostrar visualmente a linha contínua ao invés de 5 _ _ _ _ _
 
 --x--
 
-- Mostrar visualmente a linha contínua ao invés de 5 _ _ _ _ _
+- Prevenir server de ficar idle
+- "Rodada final" em que sorteia respostas das rodadas anteriores
+- Se tentar entrar com mesmo nome de usuário na mesma sala, não permitir e mostrar mensagem de erro para escolher novo nome
 - Loading quando vc tenta acessar as coisas
 - Melhores instruções antes de iniciar
 - "Compartilhe o código/link de sua sala"
-- Fase de mostrar resultados/votos mostra uma frase por vez
-- Mostrar contador de usuários online agora
+- Mostrar contador de usuários/salas online agora
 - Botão de "like" ou "voto" com ícone
 - Diferenciar *melhor* de *menção honrosa*
-- Visual
+- Visual/Design
 - Animação de frase entrando/saindo/sendo escrita
-- Apenas host com controle da sala para começar
 - Tempo pode ser personalizado, ou infinito
 - Timer leva em consideração horário inicial
 - Fazer mais perguntas pra lista
@@ -40,7 +43,7 @@ respostas preenchidas
 - "Hide room name" for streamers
 - Dono da sala poder skipar
 - Customizar letras
-- "Rodada final" em que sorteia respostas das rodadas anteriores
+- Host pode excluir usuário
 - Configurações
 - Configurações: tempo
 - Configurações: máximo de respostas por pergunta

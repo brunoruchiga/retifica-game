@@ -153,16 +153,18 @@ function Room(room) {
     for(let i = 0; i < this.users.length; i++) {
       this.users[i].answers = [];
     }
+    this.haveEveryoneFinished = false;
 
     let alphabet = 'AAABBBCCCDDDEEEFFFGGGHIIIJJJKLLLMMMNNNOOOPPPQQRRRSSSTTTUUUVVWXYZ';
     let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
-    let activeCategoriesThisRound = this.getCategoriesForThisRound(5);
+    let activeCategoriesThisRound = this.getCategoriesForThisRound();
     let gettingReadyExtraTime = 5;
     let totalTime = 100 + gettingReadyExtraTime;
 
     this.gameState.roundInfo = {
       randomLetter: randomLetter,
       categories: activeCategoriesThisRound,
+      maxAnswersPerCategory: 5,
       totalTime: totalTime
     }
     io.to(this.roomName).emit('gameStarted', this.gameState.roundInfo);
@@ -188,20 +190,23 @@ function Room(room) {
   }
 
   this.checkEarlyEnd = function() {
-    if(this.serverTimer <= 5) { //If its almost finishing, abort
+    if(this.haveEveryoneFinished) return;
+
+    if(this.serverTimer <= 5) { //If its almost finishing, abort checking early end
       return;
     }
 
-    let haveEveryoneFinished = true;
+    let tempHaveEveryoneFinished = true;
     for(let i = 0; i < this.users.length; i++) {
       if(this.users[i].socket) {
-        if(this.users[i].answers.length < this.gameState.roundInfo.categories.length) {
-          haveEveryoneFinished = false;
+        if(this.users[i].answers.length < this.gameState.roundInfo.maxAnswersPerCategory) {
+          tempHaveEveryoneFinished = false;
           return;
         }
       }
     }
-    if(haveEveryoneFinished) {
+    if(tempHaveEveryoneFinished) {
+      this.haveEveryoneFinished = true;
       setTimeout(()=>{ //Wait 3 seconds before early finish
         this.finishRound();
       }, 3000);
@@ -220,7 +225,11 @@ function Room(room) {
     io.to(this.roomName).emit('roundFinished', this.gameState.results);
   }
 
-  this.getCategoriesForThisRound = function(amount) {
+  this.getCategoriesForThisRound = function() {
+    let numberOfActiveUsers = this.getListOfActiveUsernames().length;
+    let minAmountOfCategories = 5;
+    let amount = Math.max(numberOfActiveUsers,minAmountOfCategories);
+
     if(amount > this.allQuestionsRandomized.length) {
       this.allQuestionsRandomized = getRandomizedQuestions();
     }
@@ -228,7 +237,8 @@ function Room(room) {
     let categoryObjectsForThisRound = [];
     for(let i = 0; i < categoryStringsForThisRound.length; i++) {
       categoryObjectsForThisRound.push({
-        categoryString: categoryStringsForThisRound[i][0], //TODO: I don't know why it's an array of length 1 here
+        indexOnServer: i,
+        categoryString: categoryStringsForThisRound[i], //TODO: I don't know why it's an array of length 1 here
         answers: {}
       });
     }
@@ -262,7 +272,7 @@ function Room(room) {
     // archiveAnswers(answersForAllCategories);
     */
 
-    return this.gameState.roundInfo.categories;
+    return shuffle(this.gameState.roundInfo.categories);
   }
 
   this.goToCategory = function(receivedData) {
@@ -373,7 +383,7 @@ function Room(room) {
       answerString: filteredText(data.answerString),
       votes: []
     };
-    this.gameState.roundInfo.categories[data.questionIndex].answers[user.username] = answer;
+    this.gameState.roundInfo.categories[data.indexOnServer].answers[user.username] = answer;
   }
 
   this.getUser = function(socketId) {
@@ -632,10 +642,10 @@ let questionsSuggested = [
 
 function getRandomizedQuestions() {
   let defaultQuestionsRandomized = shuffle(questions);
-  let suggestedQuestionsRandomized = shuffle(questionsSuggested);
-  let resultQuestions = defaultQuestionsRandomized; //suggestedQuestionsRandomized.concat(defaultQuestionsRandomized);
+  // let suggestedQuestionsRandomized = shuffle(questionsSuggested);
+  // let resultQuestions = defaultQuestionsRandomized; //suggestedQuestionsRandomized.concat(defaultQuestionsRandomized);
 
-  return resultQuestions;
+  return defaultQuestionsRandomized;
 }
 
 function shuffle(array) {
@@ -643,7 +653,7 @@ function shuffle(array) {
   let randomizedArray = []
   while (arrayClone.length > 0) {
     let randomIndex = Math.floor(Math.random() * arrayClone.length);
-    let randomElement = arrayClone.splice(randomIndex, 1);
+    let randomElement = arrayClone.splice(randomIndex, 1)[0];
     randomizedArray.push(randomElement);
   }
   return randomizedArray;

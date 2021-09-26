@@ -33,6 +33,7 @@ let gameRoundContainer;
 let startingRoundContainer;
 let resultsContainer;
 let resultsSentenceContainer;
+let resultsProgress;
 let randomLetterSlot;
 let randomLetterSlotBig;
 // let randomLetterSlotInStartingRound;
@@ -47,6 +48,8 @@ let confirmCategoryButton;
 let currentCategoryIndex;
 let categoriesList;
 let waitingEndFeedbackMessage;
+
+let userIndex = 0;
 
 let timer;
 
@@ -131,6 +134,7 @@ function initializeHtmlElements() {
   startingRoundContainer = select('#starting-round');
   resultsContainer = select('#results-container');
   resultsSentenceContainer = select('#results-sentence-container');
+  resultsProgress = select('#results-progress');
   randomLetterSlot = select('#random-letter');
   randomLetterSlotBig = select('#letter-big');
   // randomLetterSlotInStartingRound = select('#letter-in-instructions');
@@ -287,6 +291,13 @@ function setMeAsRoomOwner(isOwner) {
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
 
+  userIndex = 0;
+  for(let i = 0; i < data.length; i++) {
+    if(data[i].username.toString() == username.toString()) {
+      userIndex = i;
+    }
+  }
+
   let sortedUserList = data.sort(function(a, b) {
     return b.score - a.score;
   });
@@ -338,11 +349,14 @@ function handleGameStarted(receivedData) {
   updateCurrentLetter(roundInfo.randomLetter);
 
   categoriesList = [];
-  for(let i = 0; i < roundInfo.categories.length; i++) {
+  let iteratorOffset = userIndex;
+  let numberOfCategories = roundInfo.maxAnswersPerCategory;
+  for(let i = 0; i < numberOfCategories; i++) {
+    let iteratorIndex = (i + iteratorOffset) % roundInfo.categories.length;
     categoriesList.push({
-      categoryString: roundInfo.categories[i].categoryString,
-      confirmed: false,
-      indexOnServer: i
+      indexOnServer: roundInfo.categories[iteratorIndex].indexOnServer,
+      categoryString: roundInfo.categories[iteratorIndex].categoryString,
+      confirmed: false
     });
   }
   updateCurrentCategoryDisplayed(0);
@@ -412,8 +426,8 @@ function displayAnswerSlotAsEmpty() {
   categoryAnswerSlotInSentence.html('_____').addClass('empty-category-answer');
 }
 
-function Answer(questionIndex, question, answerString) {
-  this.questionIndex = questionIndex;
+function Answer(indexOnServer, question, answerString) {
+  this.indexOnServer = indexOnServer;
   this.question = question;
   this.answerString = answerString;
 }
@@ -488,13 +502,16 @@ function presentAllAnswers() {
     createAnswerInParent(
       i,
       gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers[answersUser[i]].answerString,
-      currentResultsCategoryIndex,
+      gameStateCopy.results.allCategories[currentResultsCategoryIndex].indexOnServer,
       answersUser[i],
       gameStateCopy.results.allCategories[currentResultsCategoryIndex].answers[answersUser[i]].votes,
       resultsSentenceContainer
     );
   }
   createElement('hr').parent(resultsSentenceContainer);
+
+  // let resultsProgressString = '' + '/' + ''.toString();
+  // resultsProgress.html(resultsProgressString);
 }
 
 function goToNextCategory() {
