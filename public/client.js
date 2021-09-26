@@ -395,8 +395,8 @@ function updateCurrentCategoryDisplayed(index) {
     categoryAnswerSlotInSentencePre.html('');
     categoryAnswerSlotInSentencePos.html('');
   }
-  categoryAnswerSlotInSentence.html('_____');
   categoryTextInput.value('');
+  displayAnswerSlotAsEmpty();
 
   updateConfirmCategoryButton();
 
@@ -407,6 +407,9 @@ function clearCurrentCategoryDisplayed() {
   categoryAnswerSlotInSentencePre.html('');
   categoryAnswerSlotInSentencePos.html('');
   categoryAnswerSlotInSentence.html('');
+}
+function displayAnswerSlotAsEmpty() {
+  categoryAnswerSlotInSentence.html('_____').addClass('empty-category-answer');
 }
 
 function Answer(questionIndex, question, answerString) {
@@ -419,9 +422,9 @@ function updateAnswerOnInput() {
   let answer = filteredText(categoryTextInput.value());
 
   if(answer == '') {
-    categoryAnswerSlotInSentence.html('_____');
+    displayAnswerSlotAsEmpty();
   } else {
-    categoryAnswerSlotInSentence.html(answer);
+    categoryAnswerSlotInSentence.html(answer).removeClass('empty-category-answer');
   }
 
   updateConfirmCategoryButton();
@@ -538,10 +541,10 @@ function createFormatedSentenceInParent(sentence, answer, targetParent) {
   let sentenceSplited = String(sentence).split('___');
   if(sentenceSplited.length == 1) {
     createSpan(sentenceSplited[0] + '<br/>').parent(pContainer);
-    createSpan(answer).addClass('w3-black').addClass('category-answer').parent(pContainer);
+    createSpan(answer).addClass('w3-black').addClass('category-answer').addClass('empty-category-answer').parent(pContainer);
   } else if (sentenceSplited.length > 1) {
     createSpan(sentenceSplited[0]).parent(pContainer);
-    createSpan(answer).addClass('w3-black').addClass('category-answer').parent(pContainer);
+    createSpan(answer).addClass('w3-black').addClass('category-answer').addClass('empty-category-answer').parent(pContainer);
     createSpan(sentenceSplited[1]).parent(pContainer);
   } else {
     //Error
