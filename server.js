@@ -58,6 +58,12 @@ function GameState() {
   this.state = 'waiting';
   this.roundInfo = undefined;
   this.results = undefined;
+  this.gameOptions = {
+    roundTotalTime: 100,
+    totalRounds: 10,
+    totalCategories: 5,
+    maxAnswersPerCategory: 5,
+  };
 };
 
 function Room(room) {
@@ -92,6 +98,9 @@ function Room(room) {
     });
     socket.to(this.roomName).on('finishResults', ()=>{
       this.finishResults();
+    });
+    socket.to(this.roomName).on('requestToChangeGameOptions', (receivedData)=>{
+      this.changeGameOptions(receivedData, socket);
     });
     socket.to(this.roomName).on('chatMessageSent', (receivedData)=>{
       this.handleChatMessage(receivedData, socket);
@@ -159,17 +168,23 @@ function Room(room) {
     let randomLetter = alphabet.charAt(Math.floor(Math.random()*alphabet.length));
     let activeCategoriesThisRound = this.getCategoriesForThisRound();
     let gettingReadyExtraTime = 5;
-    let totalTime = 100 + gettingReadyExtraTime;
+    let totalTime = this.gameState.gameOptions.roundTotalTime + gettingReadyExtraTime;
 
     this.gameState.roundInfo = {
       randomLetter: randomLetter,
       categories: activeCategoriesThisRound,
-      maxAnswersPerCategory: 5,
+      maxAnswersPerCategory: this.gameState.gameOptions.maxAnswersPerCategory,
+      numberOfCategoriesPerUser: this.gameState.gameOptions.totalCategories,
       totalTime: totalTime
     }
     io.to(this.roomName).emit('gameStarted', this.gameState.roundInfo);
 
     this.initializeTimer(totalTime);
+  }
+
+  this.changeGameOptions = function(newGameOptions, socket) {
+    this.gameState.gameOptions = newGameOptions;
+    socket.to(this.roomName).emit('gameOptionsChanged', this.gameState.gameOptions);
   }
 
   this.initializeTimer = function(initialTime) {
@@ -199,7 +214,7 @@ function Room(room) {
     let tempHaveEveryoneFinished = true;
     for(let i = 0; i < this.users.length; i++) {
       if(this.users[i].socket) {
-        if(this.users[i].answers.length < this.gameState.roundInfo.maxAnswersPerCategory) {
+        if(this.users[i].answers.length < this.gameState.roundInfo.numberOfCategoriesPerUser) {
           tempHaveEveryoneFinished = false;
           return;
         }
@@ -227,7 +242,7 @@ function Room(room) {
 
   this.getCategoriesForThisRound = function() {
     let numberOfActiveUsers = this.getListOfActiveUsernames().length;
-    let minAmountOfCategories = 5;
+    let minAmountOfCategories = this.gameState.gameOptions.totalCategories;
     let amount = Math.max(numberOfActiveUsers,minAmountOfCategories);
 
     if(amount > this.allQuestionsRandomized.length) {

@@ -49,6 +49,8 @@ let currentCategoryIndex;
 let categoriesList;
 let waitingEndFeedbackMessage;
 
+let gameOptions = {};
+
 let userIndex = 0;
 
 let timer;
@@ -150,6 +152,23 @@ function initializeHtmlElements() {
   handleEnterKey(categoryTextInput, confirmCategory);
   waitingEndFeedbackMessage = select('#waiting-end');
 
+  gameOptions.container = select('#game-options-container');
+  gameOptions.roundTotalTime = new CustomSlider(30, 300, 100, 10, ' segundos', 'Duração da rodada', gameOptions.container, handleRoundTotalTimeChanged);
+  function handleRoundTotalTimeChanged(value) {
+    gameStateCopy.gameOptions.roundTotalTime = value;
+    requestToUpdateGameOptions(gameStateCopy.gameOptions);
+  }
+  gameOptions.totalCategories = new CustomSlider(1, 10, 5, 1, '', 'Quantidade de frases', gameOptions.container, handleTotalCategoriesChanged);
+  function handleTotalCategoriesChanged(value) {
+    gameStateCopy.gameOptions.totalCategories = value;
+    requestToUpdateGameOptions(gameStateCopy.gameOptions);
+  }
+  gameOptions.maxAnswersPerCategory = new CustomSlider(2, 20, 5, 1, '', 'Limite de respostas por frase', gameOptions.container, handleMaxAnswersPerCategoryChanged);
+  function handleMaxAnswersPerCategoryChanged(value) {
+    gameStateCopy.gameOptions.maxAnswersPerCategory = value;
+    requestToUpdateGameOptions(gameStateCopy.gameOptions);
+  }
+
   chat.container = select('#chat-container');
   chat.messageInput = select('#chat-message-input');
   chat.sendButton = select('#send-message-button').elt.addEventListener('click', handleSendMessageButtonClicked);
@@ -164,6 +183,36 @@ function initializeHtmlElements() {
 
   warningContainer = select('#warnings').addClass('hidden');
   warningMessageSlot = select('#warning-message');
+}
+
+function CustomSlider(min, max, defaultValue, step, unit, label, targetParent, callbackOnChanged) {
+  this.container = createDiv('').parent(targetParent);
+  this.label = createSpan(label + ': ').parent(this.container);
+  this.valueDisplay = createSpan('...').parent(this.container);
+  this.unit = unit;
+  this.setValueDisplayed = function(value) {
+    this.valueDisplay.html('['+value+this.unit+']');
+  }
+  this.setValueDisplayed(defaultValue);
+  this.slider = createSlider(min, max, defaultValue, step).addClass('slider').parent(this.container);
+  this.callbackOnChanged = callbackOnChanged;
+  this.slider.input(()=> {
+    this.setValueDisplayed(this.value());
+    this.callbackOnChanged(this.value());
+  });
+  this.value = function() {
+    return this.slider.value();
+  }
+  this.setValue = function(value) {
+    this.slider.value(value);
+    this.setValueDisplayed(value);
+  }
+}
+
+function requestToUpdateGameOptions(gameOptions) {
+  if(socket) {
+    socket.emit('requestToChangeGameOptions', gameOptions);
+  }
 }
 
 function goToCreateRoomScreen() {
@@ -237,6 +286,7 @@ function setupSocket() {
   socket.on('activeUsersListUpdated', handleActiveUsersListUpdated);
   socket.on('tickSecond', handleTickSecond);
   socket.on('roundFinished', handleRoundFinished);
+  socket.on('gameOptionsChanged', handleGameOptionsChanged);
   socket.on('chatMessageSent', handleChatMessageReceived);
   socket.on('disconnect', handleDisconnection);
 }
@@ -256,14 +306,14 @@ function handleJoinedRoom(receivedData) {
 
   setMeAsRoomOwner(joinedRoomData.isOwner);
 
-  let gameState = joinedRoomData.gameState;
-  if(gameState.state == 'waiting') {
+  gameStateCopy = joinedRoomData.gameState;
+  if(gameStateCopy.state == 'waiting') {
     changeScreenStateTo('LOBBY');
   }
-  if (gameState.state == 'playing') {
-    handleGameStarted(gameState.roundInfo);
+  if (gameStateCopy.state == 'playing') {
+    handleGameStarted(gameStateCopy.roundInfo);
   }
-  if (gameState.state == 'results') {
+  if (gameStateCopy.state == 'results') {
     changeScreenStateTo('RESULTS');
   }
 
@@ -286,6 +336,17 @@ function setMeAsRoomOwner(isOwner) {
   changeVisibility(waitingOwnerRestart, !isRoomOwner);
 
   changeVisibility(resultsOwnerControls, isRoomOwner);
+
+  changeVisibility(gameOptions.roundTotalTime.slider, isRoomOwner);
+  changeVisibility(gameOptions.totalCategories.slider, isRoomOwner);
+  changeVisibility(gameOptions.maxAnswersPerCategory.slider, isRoomOwner);
+}
+
+function handleGameOptionsChanged(receivedData) {
+  gameStateCopy.gameOptions = receivedData;
+  gameOptions.roundTotalTime.setValue(gameStateCopy.gameOptions.roundTotalTime);
+  gameOptions.totalCategories.setValue(gameStateCopy.gameOptions.totalCategories);
+  gameOptions.maxAnswersPerCategory.setValue(gameStateCopy.gameOptions.maxAnswersPerCategory);
 }
 
 function handleActiveUsersListUpdated(data) {
@@ -350,7 +411,8 @@ function handleGameStarted(receivedData) {
 
   categoriesList = [];
   let iteratorOffset = userIndex;
-  let numberOfCategories = roundInfo.maxAnswersPerCategory;
+  // let numberOfCategories = roundInfo.maxAnswersPerCategory;
+  let numberOfCategories = roundInfo.numberOfCategoriesPerUser;
   for(let i = 0; i < numberOfCategories; i++) {
     let iteratorIndex = (i + iteratorOffset) % roundInfo.categories.length;
     categoriesList.push({
@@ -674,6 +736,7 @@ function getAllElements() {
     categoriesContainer,
     waitingEndFeedbackMessage,
     resultsContainer,
+    gameOptions.container,
     chat.container,
     suggestions.container,
     startingRoundContainer,
@@ -690,7 +753,7 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([header, headerTagline, footer, containerLogin]);
   }
   if(newState == 'LOBBY') {
-    activateOnlyActiveElements([header, headerTagline, footer, containerBody, startButtonContainer, chat.container, suggestions.container, activeUsernamesContainer]);
+    activateOnlyActiveElements([header, headerTagline, footer, containerBody, startButtonContainer, gameOptions.container, chat.container, suggestions.container, activeUsernamesContainer]);
   }
   if(newState == 'STARTING_GAME') {
     activateOnlyActiveElements([startingRoundContainer, containerBody, activeUsernamesContainer]);
@@ -702,7 +765,7 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([header, containerBody, resultsContainer]);
   }
   if(newState == 'WAITING_NEXT_ROUND') {
-    activateOnlyActiveElements([header, footer, containerBody, activeUsernamesContainer, restartButtonContainer, chat.container, suggestions.container]);
+    activateOnlyActiveElements([header, footer, containerBody, activeUsernamesContainer, restartButtonContainer, gameOptions.container, chat.container, suggestions.container]);
   }
   if(newState == 'LOADING') {
     activateOnlyActiveElements([header, headerTagline]);

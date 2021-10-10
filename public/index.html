@@ -291,6 +291,33 @@
         font-size: 0.8em;
         margin:0;
       }
+      .slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 15px;
+        background: #000;
+        outline: none;
+        opacity: 0.8;
+        margin: 15px 0 25px;
+        cursor: pointer;
+      }
+      .slider:hover {
+        opacity: 1;
+      }
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 10px;
+        height: 25px;
+        background: #ddd;
+        cursor: pointer;
+      }
+      .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #ddd;
+        cursor: pointer;
+      }
       #game-round-container {
         font-size:100%;
         font-weight: bold;
@@ -476,6 +503,9 @@
           <div id='restart-button-container'>
             <button id='restart-button' class='w3-btn w3-black w3-xxlarge'>Nova rodada →</button>
             <div id='waiting-owner-restart' class='hidden'><p>Aguardando o dono da sala iniciar a próxima rodada...</p></div>
+          </div>
+          <div id='game-options-container' class='container'>
+            <p><strong>Opções</strong></p>
           </div>
           <div id='chat-container' class='container w3-small'>
             <p><strong>Chat:</strong></p>
