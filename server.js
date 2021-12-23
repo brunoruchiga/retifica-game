@@ -62,7 +62,7 @@ function GameState() {
     roundTotalTime: 100,
     totalRounds: 10,
     totalCategories: 5,
-    maxAnswersPerCategory: 5,
+    maxAnswersPerCategory: 10,
   };
 };
 
@@ -243,7 +243,12 @@ function Room(room) {
   this.getCategoriesForThisRound = function() {
     let numberOfActiveUsers = this.getListOfActiveUsernames().length;
     let minAmountOfCategories = this.gameState.gameOptions.totalCategories;
-    let amount = Math.max(numberOfActiveUsers,minAmountOfCategories);
+    let maxAnswersPerCategory = this.gameState.gameOptions.maxAnswersPerCategory;
+
+    let amount = minAmountOfCategories;
+    if(numberOfActiveUsers > maxAnswersPerCategory) {
+      amount = amount + (numberOfActiveUsers - maxAnswersPerCategory);
+    }
 
     if(amount > this.allQuestionsRandomized.length) {
       this.allQuestionsRandomized = getRandomizedQuestions();
