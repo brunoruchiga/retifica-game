@@ -20,12 +20,12 @@ respostas preenchidas
 - Fase de mostrar resultados/votos mostra uma frase por vez
 - Apenas host com controle da sala para começar
 - Mostrar visualmente a linha contínua ao invés de 5 _ _ _ _ _
+- Configurações
+- Configurações: máximo de respostas por pergunta
 
 --x--
 
-- Configurações
-- Configurações: tempo
-- Configurações: máximo de respostas por pergunta
+- Configurações: tempo (tempo pode ser personalizado, ou infinito)
 - Configurações: número de rodadas
 - Configurações: letras possíveis
 - Prevenir server de ficar idle
@@ -37,15 +37,16 @@ respostas preenchidas
 - Mostrar contador de usuários/salas online agora
 - Botão de "like" ou "voto" com ícone
 - Diferenciar *melhor* de *menção honrosa*
+- Resultado da rodada
+- Comemorar "destaque" da rodada: mais votado no total, mais votado em uma única frase, etc
 - Visual/Design
 - Animação de frase entrando/saindo/sendo escrita
-- Tempo pode ser personalizado, ou infinito
 - Timer leva em consideração horário inicial
 - Fazer mais perguntas pra lista
 - Lista de temas personalizada
-- Fazer uma resposta aleatório (sortear de outra categoria)
+- Fazer uma resposta aleatória (sortear de outra categoria)
 - Ter versão family-friendly
 - "Hide room name" for streamers
 - Dono da sala poder skipar
-- Customizar letras
-- Host pode excluir usuário
+- Host pode excluir usuário (banir)
+- Efeitos sonoros
