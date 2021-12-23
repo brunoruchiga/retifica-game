@@ -158,12 +158,12 @@ function initializeHtmlElements() {
     gameStateCopy.gameOptions.roundTotalTime = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
   }
-  gameOptions.totalCategories = new CustomSlider(1, 10, 5, 1, '', 'Quantidade de frases', gameOptions.container, handleTotalCategoriesChanged);
+  gameOptions.totalCategories = new CustomSlider(1, 10, 5, 1, '', 'Quantidade mínima de frases', gameOptions.container, handleTotalCategoriesChanged);
   function handleTotalCategoriesChanged(value) {
     gameStateCopy.gameOptions.totalCategories = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
   }
-  gameOptions.maxAnswersPerCategory = new CustomSlider(2, 20, 5, 1, '', 'Limite de respostas por frase', gameOptions.container, handleMaxAnswersPerCategoryChanged);
+  gameOptions.maxAnswersPerCategory = new CustomSlider(2, 20, 10, 1, '', 'Limite de respostas por frase', gameOptions.container, handleMaxAnswersPerCategoryChanged);
   function handleMaxAnswersPerCategoryChanged(value) {
     gameStateCopy.gameOptions.maxAnswersPerCategory = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
