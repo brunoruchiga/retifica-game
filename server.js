@@ -157,6 +157,7 @@ function Room(room) {
   this.startNewRound = function() {
     this.gameState.state = 'playing';
     this.gameState.results = undefined;
+    this.gameState.roundsInfoHistory = [];
     this.serverTimer = -1;
     this.timerSetTimeoutFunction = undefined;
     for(let i = 0; i < this.users.length; i++) {
@@ -237,6 +238,7 @@ function Room(room) {
       currentCategoryIndex: 0
     };
 
+    this.gameState.roundsInfoHistory.push(this.gameState.roundInfo);
     io.to(this.roomName).emit('roundFinished', this.gameState.results);
   }
 
