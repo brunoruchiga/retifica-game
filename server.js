@@ -239,6 +239,9 @@ function Room(room) {
     };
 
     this.gameState.roundsInfoHistory.push(this.gameState.roundInfo);
+
+    console.log(this.getAllAnswersForAllCategories());
+
     io.to(this.roomName).emit('roundFinished', this.gameState.results);
   }
 
@@ -426,6 +429,22 @@ function Room(room) {
       text: filteredText(text)
     };
     io.to(this.roomName).emit('chatMessageSent', messageData);
+  }
+
+  this.getAllAnswersForAllCategories = function() {
+    let allAnswers = [];
+    const roundsInfoHistory = this.gameState.roundsInfoHistory;
+    for(let i = 0; i < roundsInfoHistory.length; i++) {
+      for(let categoryIndex = 0; categoryIndex < roundsInfoHistory[i].categories.length; categoryIndex++) {
+        const answers = roundsInfoHistory[i].categories[categoryIndex].answers;
+        let answersKeys = Object.keys(answers);
+        for(let answersKeysIndex = 0; answersKeysIndex < answersKeys.length; answersKeysIndex++) {
+          const answer = answers[answersKeys[answersKeysIndex]].answerString;
+          allAnswers.push(answer);
+        }
+      }
+    }
+    return allAnswers;
   }
 }
 
