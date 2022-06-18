@@ -128,6 +128,7 @@ function Room(room) {
     if(user) {
       if(user.socket == undefined) { //...If there is no socket, attribute this socket to the same user
         user.socket = socket;
+        return user;
       } else {
         //Generate different username (user --> user2 --> user3) and create new user
         let differentUsernameGenerated = username;

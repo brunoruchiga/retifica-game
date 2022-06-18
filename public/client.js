@@ -352,6 +352,7 @@ function handleGameOptionsChanged(receivedData) {
 function handleActiveUsersListUpdated(data) {
   activeUsernamesListContainer.html('');
 
+  //Find the index of my own username on the list
   userIndex = 0;
   for(let i = 0; i < data.length; i++) {
     if(data[i].username.toString() == username.toString()) {
@@ -359,6 +360,7 @@ function handleActiveUsersListUpdated(data) {
     }
   }
 
+  //Sort list by user score
   let sortedUserList = data.sort(function(a, b) {
     return b.score - a.score;
   });

@@ -24,10 +24,10 @@ respostas preenchidas
 - Configurações: máximo de respostas por pergunta
 - Configurações: tempo
 - Manter o servidor ligado enquanto houver alguém online (prevenir server de ficar idle)
+- Corrigir bug de reconexão que mostra o usuário repetido na lista
 
 --x--
 
-- Corrigir bug de reconexão que mostra o usuário repetido na lista
 - Melhorar opções das configurações que hoje parecem confusas
 
 - Configurações: número de rodadas
