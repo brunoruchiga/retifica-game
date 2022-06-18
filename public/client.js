@@ -454,7 +454,9 @@ function playSelectingRandomLetterAnimation(targetLetter) {
   }, 100);
 }
 
+let currentLetter = "";
 function updateCurrentLetter(letter) {
+  currentLetter = letter;
   randomLetterSlot.html(letter);
   // randomLetterSlotInStartingRound.html(letter);
   playSelectingRandomLetterAnimation(letter);
@@ -491,6 +493,7 @@ function clearCurrentCategoryDisplayed() {
 }
 function displayAnswerSlotAsEmpty() {
   categoryAnswerSlotInSentence.html('_____').addClass('empty-category-answer');
+  categoryAnswerSlotInSentence.removeClass('wrong-first-letter');
 }
 
 function Answer(indexOnServer, question, answerString) {
@@ -506,6 +509,13 @@ function updateAnswerOnInput() {
     displayAnswerSlotAsEmpty();
   } else {
     categoryAnswerSlotInSentence.html(answer).removeClass('empty-category-answer');
+
+    //Validation of first letter is correct
+    if (answer.charAt(0).toLowerCase() == currentLetter.toLowerCase()) {
+      categoryAnswerSlotInSentence.removeClass('wrong-first-letter');
+    } else {
+      categoryAnswerSlotInSentence.addClass('wrong-first-letter');
+    }
   }
 
   updateConfirmCategoryButton();
