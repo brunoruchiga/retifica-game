@@ -810,7 +810,14 @@ function handleEnterKey(textInput, f) {
   });
 }
 
-
 function filteredText(text) {
   return String(text).replace(/\<.*?\>/, '');
 }
+
+setInterval(()=> {
+  console.log('Acorda!');
+  let url = location.origin + '/?acorda';
+  let xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", url);
+  xmlHttp.send();
+}, 5*60*1000);

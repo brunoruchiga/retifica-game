@@ -22,13 +22,16 @@ respostas preenchidas
 - Mostrar visualmente a linha contínua ao invés de 5 _ _ _ _ _
 - Configurações
 - Configurações: máximo de respostas por pergunta
+- Configurações: tempo
+- Manter o servidor ligado enquanto houver alguém online (prevenir server de ficar idle)
 
 --x--
 
-- Configurações: tempo (tempo pode ser personalizado, ou infinito)
+- Corrigir bug de reconexão que mostra o usuário repetido na lista
+- Melhorar opções das configurações que hoje parecem confusas
+
 - Configurações: número de rodadas
 - Configurações: letras possíveis
-- Prevenir server de ficar idle
 - "Rodada final" em que sorteia respostas das rodadas anteriores
 - Se tentar entrar com mesmo nome de usuário na mesma sala, não permitir e mostrar mensagem de erro para escolher novo nome
 - Loading quando vc tenta acessar as coisas
