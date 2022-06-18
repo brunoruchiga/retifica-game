@@ -30,6 +30,7 @@ let activeUsernamesContainer;
 let activeUsernamesListContainer;
 
 let gameRoundContainer;
+let instructionPreRoundContainer;
 let startingRoundContainer;
 let resultsContainer;
 let resultsSentenceContainer;
@@ -133,6 +134,7 @@ function initializeHtmlElements() {
   activeUsernamesListContainer = select('#usernames-list');
 
   gameRoundContainer = select('#game-round-container');
+  instructionPreRoundContainer = select('#instructions-pre-round');
   startingRoundContainer = select('#starting-round');
   resultsContainer = select('#results-container');
   resultsSentenceContainer = select('#results-sentence-container');
@@ -742,6 +744,7 @@ function getAllElements() {
     gameOptions.container,
     chat.container,
     suggestions.container,
+    instructionPreRoundContainer,
     startingRoundContainer,
     activeUsernamesContainer
   ];
@@ -756,7 +759,7 @@ function changeScreenStateTo(newState) {
     activateOnlyActiveElements([header, headerTagline, footer, containerLogin]);
   }
   if(newState == 'LOBBY') {
-    activateOnlyActiveElements([header, headerTagline, footer, containerBody, startButtonContainer, gameOptions.container, chat.container, suggestions.container, activeUsernamesContainer]);
+    activateOnlyActiveElements([header, headerTagline, instructionPreRoundContainer, footer, containerBody, startButtonContainer, gameOptions.container, chat.container, suggestions.container, activeUsernamesContainer]);
   }
   if(newState == 'STARTING_GAME') {
     activateOnlyActiveElements([startingRoundContainer, containerBody, activeUsernamesContainer]);

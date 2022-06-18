@@ -25,10 +25,9 @@ respostas preenchidas
 - Configurações: tempo
 - Manter o servidor ligado enquanto houver alguém online (prevenir server de ficar idle)
 - Corrigir bug de reconexão que mostra o usuário repetido na lista
+- Melhorar opções das configurações que hoje parecem confusas
 
 --x--
-
-- Melhorar opções das configurações que hoje parecem confusas
 
 - Configurações: número de rodadas
 - Configurações: letras possíveis
