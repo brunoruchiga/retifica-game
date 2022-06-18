@@ -158,7 +158,7 @@ function initializeHtmlElements() {
     gameStateCopy.gameOptions.roundTotalTime = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
   }
-  gameOptions.totalCategories = new CustomSlider(1, 10, 5, 1, '', 'Quantidade mínima de frases', gameOptions.container, handleTotalCategoriesChanged);
+  gameOptions.totalCategories = new CustomSlider(1, 10, 5, 1, '', 'Quantidade de frases', gameOptions.container, handleTotalCategoriesChanged);
   function handleTotalCategoriesChanged(value) {
     gameStateCopy.gameOptions.totalCategories = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
@@ -168,6 +168,7 @@ function initializeHtmlElements() {
     gameStateCopy.gameOptions.maxAnswersPerCategory = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
   }
+  changeVisibility(gameOptions.maxAnswersPerCategory.container, false); //Hide option because its confuse
 
   chat.container = select('#chat-container');
   chat.messageInput = select('#chat-message-input');
