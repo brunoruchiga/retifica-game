@@ -678,8 +678,7 @@ let questions = [
   'Quando terminar a live eu mando a raid para ___, prometo!',
   '___ acabou de entrar ao vivo.',
   '___ foi banido do chat por 4800 segundos',
-  'Foi expulso por ___'
-  '',
+  'Foi expulso por ___',
 
 
 
