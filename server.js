@@ -669,16 +669,16 @@ let questions = [
 
 
 
-  '___. Foi o que ela disse.',
-  'Depois de 8 horas seguidas em live, só restava ___.',
-  'Chegou a #GankDo___ pog pog pog',
-  'Depois de tantas horas, tudo o que eu quero é ___',
-  '___ é melhor do que café para se manter acordado.',
-  'Só ___ consegue dar mais mancada que essa pessoa',
-  'Quando terminar a live eu mando a raid para ___, prometo!',
-  '___ acabou de entrar ao vivo.',
-  '___ foi banido do chat por 4800 segundos',
-  'Foi expulso por ___',
+  // '___. Foi o que ela disse.',
+  // 'Depois de 8 horas seguidas em live, só restava ___.',
+  // 'Chegou a #GankDo___ pog pog pog',
+  // 'Depois de tantas horas, tudo o que eu quero é ___',
+  // '___ é melhor do que café para se manter acordado.',
+  // 'Só ___ consegue dar mais mancada que essa pessoa',
+  // 'Quando terminar a live eu mando a raid para ___, prometo!',
+  // '___ acabou de entrar ao vivo.',
+  // '___ foi banido do chat por 4800 segundos',
+  // 'Foi expulso por ___',
 
 
 
