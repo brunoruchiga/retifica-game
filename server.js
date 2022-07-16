@@ -576,7 +576,7 @@ let questions = [
   'Fátima, é um prazer estar aqui no seu programa para poder falar sobre ___',
   '___ foi proibido nas Olimpíadas por ser considerado muito perigoso',
   'Rolê bad vibe',
-  'Fui cancelado por ___',
+  // 'Fui cancelado por ___',
   'Urgente: Polícia Federal deflagra nova fase da Operação ___',
   '___ deveria ser ilegal',
   'Fui no cinema pra ver ___',
@@ -655,8 +655,52 @@ let questions = [
   // 'Tu viu? O Bolsonaro disse vai ___ amanhã.',
   // 'O presidente do STF decidiu que ___.',
   'Minha mãe faz um ___ delicioso!',
-  'Gostei de um vídeo de Manual do Mundo: VOCÊ NÃO ACREDITA COMO É UM ___ POR DENTRO!',
+  // 'Gostei de um vídeo de Manual do Mundo: VOCÊ NÃO ACREDITA COMO É UM ___ POR DENTRO!',
+
+
+
+
+
+
+
+
+
+
+
+
+
+  '___. Foi o que ela disse.',
+  'Depois de 8 horas seguidas em live, só restava ___.',
+  'Chegou a #GankDo___ pog pog pog',
+  'Depois de tantas horas, tudo o que eu quero é ___',
+  '___ é melhor do que café para se manter acordado.',
+  'Só ___ consegue dar mais mancada que essa pessoa',
+  'Quando terminar a live eu mando a raid para ___, prometo!',
+  '___ acabou de entrar ao vivo.',
+  '___ foi banido do chat por 4800 segundos',
+  'Foi expulso por ___'
+  '',
+
+
+
+
+
+
 ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 let questionsSuggested = [
   //Sugestões
