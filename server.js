@@ -563,8 +563,8 @@ function filteredText(text) {
 }
 
 let questions = [
-  // 'Nome de idoso',
-  // 'Nome de cachorro',
+  'Nome de idoso',
+  'Nome de cachorro',
   'Lugar onde já chorei',
   'Novo sabor de miojo: ___!',
   'Um ótimo presente para o Dia dos Namorados',
@@ -573,8 +573,8 @@ let questions = [
   '___: Nova série original GloboPlay',
   'Esta é uma manifestação muito importante para conscientizar toda a sociedade sobre o problema com ___',
   'Essa cicatriz aqui na perna foi causada por ___',
-  'Chico Barney, é um prazer estar aqui no seu programa para poder falar sobre ___',
-  '___ foi proibido na Copa do Mundo por ser considerado muito perigoso',
+  'Fátima, é um prazer estar aqui no seu programa para poder falar sobre ___',
+  '___ foi proibido nas Olimpíadas por ser considerado muito perigoso',
   'Rolê bad vibe',
   // 'Fui cancelado por ___',
   'Urgente: Polícia Federal deflagra nova fase da Operação ___',
@@ -584,7 +584,7 @@ let questions = [
   'Novo curso do Senac: ___ e Automação',
   'Mamãe está há horas tentando falar com o suporte técnico da ___',
   'Oferecimento: ___',
-  // 'Artista do SBT',
+  'Artista do SBT',
   'Minha próxima viagem vai ser para ___',
   'Se ___, não dirija',
   'Tua piscina está cheia de ___',
@@ -609,7 +609,7 @@ let questions = [
   'Qual é meu poder secreto?',
   'Nenhum jantar romântico estaria completo sem ___',
   'A excursão escolar da terceira série foi completamente arruinada por ___',
-  // 'Ministério da ___',
+  'Ministério da ___',
   'Não era amor, era ___',
   'A gente terminou porque ele era muito ___',
   'Passarinho! Que som é esse? Esse é o som de ___',
@@ -625,7 +625,7 @@ let questions = [
 
   //https://www.trueachievements.com/a208499/quiplash-xl-back-talk-achievement
   'O segredo para uma vida feliz:',
-  // 'Eu aprendi que jamais se deve colocar ___ na pizza',
+  'Eu aprendi que jamais se deve colocar ___ na pizza',
 
 
 
@@ -643,7 +643,7 @@ let questions = [
   'Moisés desceu do morro antes que Deus pudesse ditar o 11º mandamento: Não ___.',
   'Nove em cada dez médicos recomenda ___.',
   // 'Maurício tomando vodka com ___',
-  // '___ é infalível para animar uma festa',
+  '___ é infalível para animar uma festa',
   // 'Se não fosse o Bolsonaro, eu estaria ___.',
   // 'Tenho uma fofoca boa: aquele meu colega ___',
   // 'No primeiro almoço com minha família, meu/minha namorado(a) estava vestindo ___.',
@@ -654,24 +654,15 @@ let questions = [
   // 'Descobriram que hidroxicloroquina cura ___.',
   // 'Tu viu? O Bolsonaro disse vai ___ amanhã.',
   // 'O presidente do STF decidiu que ___.',
-  // 'Minha mãe faz um ___ delicioso!',
+  'Minha mãe faz um ___ delicioso!',
   // 'Gostei de um vídeo de Manual do Mundo: VOCÊ NÃO ACREDITA COMO É UM ___ POR DENTRO!',
 
 
-  // Especial Natal
-  'Nome de duende do Papai Noel',
-  '___ arruinou o Natal de 2022',
-  'Ano que vem ao invés de Roberto Carlos vai ter Especial do(a) ___ na Globo',
-  'Que presente pedi para Papai Noel?',
-  'Minha única promessa de Ano Novo para o ano que vem:',
-  'Onde vou passar o Revéillon',
-  'No governo Lula vai ter muita ___',
-  'Todo ano para a ceia minha mãe faz um ___ delicioso!',
-  '___ é infalível para animar uma festa em família',
-  'Eu aprendi que jamais se deve colocar ___ no peru',
-  'Confirmado o nome do novo Ministro do ___',
-  'Na hora da virada eu quero estar ___!',
-  'Quem é o Papai Noel secreto do SBT?',
+
+
+
+
+
 
 
 
