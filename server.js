@@ -576,7 +576,7 @@ let questions = [
   'Fátima, é um prazer estar aqui no seu programa para poder falar sobre ___',
   '___ foi proibido nas Olimpíadas por ser considerado muito perigoso',
   'Rolê bad vibe',
-  // 'Fui cancelado por ___',
+  'Fui cancelado por ___',
   'Urgente: Polícia Federal deflagra nova fase da Operação ___',
   '___ deveria ser ilegal',
   'Fui no cinema pra ver ___',
@@ -621,7 +621,7 @@ let questions = [
   'Quando eu for milionário, vou mandar erguer uma estátua de 10 metros de altura para celebrar ___',
   '___: O Musical',
   'Não sei com que armas será lutada a 3ª Guerra Mundial, mas a 4ª Guerra Mundial será com ___',
-  // 'Como eu perdi minha virgindade?',
+  'Como eu perdi minha virgindade?',
 
   //https://www.trueachievements.com/a208499/quiplash-xl-back-talk-achievement
   'O segredo para uma vida feliz:',
@@ -646,7 +646,7 @@ let questions = [
   '___ é infalível para animar uma festa',
   // 'Se não fosse o Bolsonaro, eu estaria ___.',
   // 'Tenho uma fofoca boa: aquele meu colega ___',
-  // 'No primeiro almoço com minha família, meu/minha namorado(a) estava vestindo ___.',
+  'No primeiro almoço com minha família, o crush estava vestindo ___.',
   // 'Encontrei ___ no meu umbigo.',
   // 'Caiu minha máscara no(a) ___ e agora vou ter que ir lá pegar.',
   'Eu já tentei ___, mas não recomendo.',
@@ -655,7 +655,7 @@ let questions = [
   // 'Tu viu? O Bolsonaro disse vai ___ amanhã.',
   // 'O presidente do STF decidiu que ___.',
   'Minha mãe faz um ___ delicioso!',
-  // 'Gostei de um vídeo de Manual do Mundo: VOCÊ NÃO ACREDITA COMO É UM ___ POR DENTRO!',
+  'Gostei de um vídeo no YouTube: Você não vai acreditar como é um ___ por dentro! 320k views',
 
 
 
@@ -670,14 +670,14 @@ let questions = [
 
 
   // '___. Foi o que ela disse.',
-  // 'Depois de 8 horas seguidas em live, só restava ___.',
-  // 'Chegou a #GankDo___ pog pog pog',
+  'Chat, depois de 8 horas seguidas de live, chegou a hora de ___!',
+  'Chegou a #GankDo___ pog pog pog',
   // 'Depois de tantas horas, tudo o que eu quero é ___',
-  // '___ é melhor do que café para se manter acordado.',
+  '___ é muito melhor do que café para se manter acordado.',
   // 'Só ___ consegue dar mais mancada que essa pessoa',
   // 'Quando terminar a live eu mando a raid para ___, prometo!',
   // '___ acabou de entrar ao vivo.',
-  // '___ foi banido do chat por 4800 segundos',
+  '___ foi banido do chat por 4800 segundos',
   // 'Foi expulso por ___',
 
 
