@@ -684,7 +684,7 @@ let questions = [
 
 
   'Mano, ele construiu uma ___ gigante do lado do spawn',
-  'Pelas regras do servidor de Minecraft, é proibido ___ sem pedir autorização',
+  'Pelas regras desse server de Minecraft é proibido ___ sem pedir autorização',
   'Eu instalei um mod que faz todos os mobs se transformarem em ___',
 
 ]
