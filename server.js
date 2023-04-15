@@ -564,7 +564,7 @@ function filteredText(text) {
 
 let questions = [
   'Nome de idoso',
-  'Nome de cachorro',
+  'Minha sobrinha colocou o nome do novo cachorrinho dela de ___, em homenagem ao avô',
   'Lugar onde já chorei',
   'Novo sabor de miojo: ___!',
   'Um ótimo presente para o Dia dos Namorados',
@@ -662,13 +662,6 @@ let questions = [
 
 
 
-
-
-
-
-
-
-
   // '___. Foi o que ela disse.',
   'Chat, depois de 8 horas seguidas de live, chegou a hora de ___!',
   'Chegou a #GankDo___ pog pog pog',
@@ -686,6 +679,9 @@ let questions = [
   'Mano, ele construiu uma ___ gigante do lado do spawn',
   'Pelas regras desse server de Minecraft é proibido ___ sem pedir autorização',
   'Eu instalei um mod que faz todos os mobs se transformarem em ___',
+  'Se atingir a meta de 500 subs na próxima live a gente vai jogar ___',
+  'Bomba! Ex-BBB ___ se rende ao mundo das drogas',
+  'Obrigado pelo follow, ___!',
 
 ]
 
