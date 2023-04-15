@@ -155,12 +155,12 @@ function initializeHtmlElements() {
   waitingEndFeedbackMessage = select('#waiting-end');
 
   gameOptions.container = select('#game-options-container');
-  gameOptions.roundTotalTime = new CustomSlider(30, 300, 100, 10, ' segundos', 'Duração da rodada', gameOptions.container, handleRoundTotalTimeChanged);
+  gameOptions.roundTotalTime = new CustomSlider(30, 210, 100, 10, ' segundos', 'Duração da rodada', gameOptions.container, handleRoundTotalTimeChanged);
   function handleRoundTotalTimeChanged(value) {
     gameStateCopy.gameOptions.roundTotalTime = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
   }
-  gameOptions.totalCategories = new CustomSlider(1, 10, 5, 1, '', 'Quantidade de frases', gameOptions.container, handleTotalCategoriesChanged);
+  gameOptions.totalCategories = new CustomSlider(1, 7, 5, 1, '', 'Quantidade de frases', gameOptions.container, handleTotalCategoriesChanged);
   function handleTotalCategoriesChanged(value) {
     gameStateCopy.gameOptions.totalCategories = value;
     requestToUpdateGameOptions(gameStateCopy.gameOptions);
@@ -837,3 +837,20 @@ setInterval(()=> {
   xmlHttp.open("GET", url);
   xmlHttp.send();
 }, 5*60*1000);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
